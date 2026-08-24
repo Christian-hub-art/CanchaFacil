@@ -10,5 +10,13 @@ public class Usuario {
     private int id;
     private String nombre;
     private String email;    
-    
+    private String password;
+    private String telefono;
+    private Rol rol;
+    private fechaRegistro LocalDateTime;
+    private List<Negocio> negocios;
+    private List<Reserva> reservas;
+    private List<Calificacion> calificaciones;
+    private List<Notificacion> notificaciones;
+
 }

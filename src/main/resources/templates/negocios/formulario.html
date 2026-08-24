@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${accion}">Negocio</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="${accion}">Crear negocio</h2>
+
+    <div class="error" th:if="${error}" th:text="${error}"></div>
+    <p class="vacio" th:if="${#lists.isEmpty(usuarios)}">
+        Primero cree un usuario: todo negocio necesita un administrador.
+    </p>
+
+    <form th:action="@{/negocios/add}" th:object="${negocio}" method="post">
+        <input type="hidden" th:field="*{id}">
+
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" th:field="*{nombre}" required>
+
+        <label for="nit">NIT</label>
+        <input type="text" id="nit" th:field="*{nit}" required>
+
+        <label for="direccion">Direccion</label>
+        <input type="text" id="direccion" th:field="*{direccion}">
+
+        <label for="descripcion">Descripcion</label>
+        <textarea id="descripcion" th:field="*{descripcion}" rows="3"></textarea>
+
+        <!-- No usa th:field porque administradorId es un @RequestParam, no un campo del objeto -->
+        <label for="administradorId">Administrador</label>
+        <select id="administradorId" name="administradorId" required>
+            <option value="">-- Seleccione --</option>
+            <option th:each="u : ${usuarios}"
+                    th:value="${u.id}"
+                    th:text="${u.nombre} + ' (' + ${u.email} + ')'"
+                    th:selected="${negocio.administrador != null and negocio.administrador.id == u.id}">Juan</option>
+        </select>
+
+        <p>
+            <button class="boton" type="submit">Guardar</button>
+            <a class="boton gris" th:href="@{/negocios}">Cancelar</a>
+        </p>
+    </form>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle del espacio</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="'Espacio: ' + ${espacio.nombre}">Espacio</h2>
+
+    <dl>
+        <dt>Id</dt><dd th:text="${espacio.id}">1</dd>
+        <dt>Deporte</dt><dd th:text="${espacio.tipoDeporte}">futbol</dd>
+        <dt>Precio por hora</dt><dd th:text="${espacio.precioHora}">50000</dd>
+        <dt>Capacidad</dt><dd th:text="${espacio.capacidad}">10</dd>
+        <dt>Descripcion</dt><dd th:text="${espacio.descripcion}">-</dd>
+        <dt>Negocio</dt><dd th:text="${espacio.negocio != null} ? ${espacio.negocio.nombre} : '-'">Canchas</dd>
+        <dt>Promedio de calificacion</dt>
+        <dd th:text="${#numbers.formatDecimal(promedio, 1, 1)} + ' / 5'">0.0 / 5</dd>
+    </dl>
+
+    <h3>Calificaciones</h3>
+    <p class="vacio" th:if="${#lists.isEmpty(calificaciones)}">Este espacio aun no tiene calificaciones.</p>
+    <ul th:unless="${#lists.isEmpty(calificaciones)}">
+        <li th:each="c : ${calificaciones}"
+            th:text="${c.puntuacion} + '/5 - ' + (${c.comentario} != null ? ${c.comentario} : 'sin comentario')">5/5</li>
+    </ul>
+
+    <p>
+        <a class="boton" th:href="@{/reservas}">Ver reservas</a>
+        <a class="boton gris" th:href="@{/espacios/update/{id}(id=${espacio.id})}">Editar</a>
+        <a class="boton gris" th:href="@{/espacios}">Volver</a>
+    </p>
+</main>
+
+</body>
+</html>

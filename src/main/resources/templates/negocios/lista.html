@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Negocios</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="${titulo}">Negocios</h2>
+
+    <a class="boton" th:href="@{/negocios/add}">Nuevo negocio</a>
+
+    <form th:action="@{/negocios}" method="get" style="margin-top:1rem">
+        <label for="nombre">Buscar por nombre</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Ej: Canchas del Norte">
+        <button class="boton" type="submit" style="margin-top:.6rem">Buscar</button>
+    </form>
+
+    <p class="vacio" th:if="${#lists.isEmpty(negocios)}">Todavia no hay negocios registrados.</p>
+
+    <table th:unless="${#lists.isEmpty(negocios)}">
+        <thead>
+        <tr><th>Id</th><th>Nombre</th><th>NIT</th><th>Direccion</th><th>Administrador</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="negocio : ${negocios}">
+            <td th:text="${negocio.id}">1</td>
+            <td th:text="${negocio.nombre}">Canchas</td>
+            <td th:text="${negocio.nit}">900</td>
+            <td th:text="${negocio.direccion}">Calle 1</td>
+            <td th:text="${negocio.administrador != null} ? ${negocio.administrador.nombre} : '-'">Juan</td>
+            <td class="acciones">
+                <a class="boton" th:href="@{/negocios/{id}(id=${negocio.id})}">Ver</a>
+                <a class="boton gris" th:href="@{/negocios/update/{id}(id=${negocio.id})}">Editar</a>
+                <a class="boton rojo" th:href="@{/negocios/delete/{id}(id=${negocio.id})}">Eliminar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+
+</body>
+</html>

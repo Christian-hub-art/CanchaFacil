@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Espacios</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="${titulo}">Espacios</h2>
+
+    <a class="boton" th:href="@{/espacios/add}">Nuevo espacio</a>
+
+    <form th:action="@{/espacios}" method="get" style="margin-top:1rem">
+        <label for="deporte">Filtrar por deporte</label>
+        <input type="text" id="deporte" name="deporte" placeholder="Ej: futbol">
+        <button class="boton" type="submit" style="margin-top:.6rem">Buscar</button>
+    </form>
+
+    <p class="vacio" th:if="${#lists.isEmpty(espacios)}">Todavia no hay espacios registrados.</p>
+
+    <table th:unless="${#lists.isEmpty(espacios)}">
+        <thead>
+        <tr><th>Id</th><th>Nombre</th><th>Deporte</th><th>Precio/hora</th><th>Capacidad</th><th>Negocio</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="espacio : ${espacios}">
+            <td th:text="${espacio.id}">1</td>
+            <td th:text="${espacio.nombre}">Cancha 1</td>
+            <td th:text="${espacio.tipoDeporte}">futbol</td>
+            <td th:text="${espacio.precioHora}">50000</td>
+            <td th:text="${espacio.capacidad}">10</td>
+            <td th:text="${espacio.negocio != null} ? ${espacio.negocio.nombre} : '-'">Canchas</td>
+            <td class="acciones">
+                <a class="boton" th:href="@{/espacios/{id}(id=${espacio.id})}">Ver</a>
+                <a class="boton gris" th:href="@{/espacios/update/{id}(id=${espacio.id})}">Editar</a>
+                <a class="boton rojo" th:href="@{/espacios/delete/{id}(id=${espacio.id})}">Eliminar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+
+</body>
+</html>

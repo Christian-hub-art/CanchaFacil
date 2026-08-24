@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${accion}">Notificacion</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="${accion}">Crear notificacion</h2>
+
+    <div class="error" th:if="${error}" th:text="${error}"></div>
+    <p class="vacio" th:if="${#lists.isEmpty(usuarios)}">Primero cree un usuario.</p>
+
+    <form th:action="@{/notificaciones/add}" th:object="${notificacion}" method="post">
+        <input type="hidden" th:field="*{id}">
+
+        <label for="usuarioId">Usuario destinatario</label>
+        <select id="usuarioId" name="usuarioId" required>
+            <option value="">-- Seleccione --</option>
+            <option th:each="u : ${usuarios}"
+                    th:value="${u.id}"
+                    th:text="${u.nombre}"
+                    th:selected="${notificacion.usuario != null and notificacion.usuario.id == u.id}">Juan</option>
+        </select>
+
+        <label for="tipo">Tipo</label>
+        <input type="text" id="tipo" th:field="*{tipo}" placeholder="RESERVA, PAGO, RECORDATORIO" required>
+
+        <label for="mensaje">Mensaje</label>
+        <textarea id="mensaje" th:field="*{mensaje}" rows="3" required></textarea>
+
+        <p>
+            <button class="boton" type="submit">Guardar</button>
+            <a class="boton gris" th:href="@{/notificaciones}">Cancelar</a>
+        </p>
+    </form>
+</main>
+
+</body>
+</html>

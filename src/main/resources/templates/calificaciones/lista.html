@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Calificaciones</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="${titulo}">Calificaciones</h2>
+
+    <a class="boton" th:href="@{/calificaciones/add}">Nueva calificacion</a>
+
+    <p class="vacio" th:if="${#lists.isEmpty(calificaciones)}">No hay calificaciones para mostrar.</p>
+
+    <table th:unless="${#lists.isEmpty(calificaciones)}">
+        <thead>
+        <tr><th>Id</th><th>Usuario</th><th>Espacio</th><th>Puntuacion</th><th>Comentario</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="calificacion : ${calificaciones}">
+            <td th:text="${calificacion.id}">1</td>
+            <td th:text="${calificacion.usuario != null} ? ${calificacion.usuario.nombre} : '-'">Juan</td>
+            <td th:text="${calificacion.espacio != null} ? ${calificacion.espacio.nombre} : '-'">Cancha 1</td>
+            <td th:text="${calificacion.puntuacion} + '/5'">5/5</td>
+            <td th:text="${calificacion.comentario}">Excelente</td>
+            <td class="acciones">
+                <a class="boton" th:href="@{/calificaciones/{id}(id=${calificacion.id})}">Ver</a>
+                <a class="boton gris" th:href="@{/calificaciones/update/{id}(id=${calificacion.id})}">Editar</a>
+                <a class="boton rojo" th:href="@{/calificaciones/delete/{id}(id=${calificacion.id})}">Eliminar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+
+</body>
+</html>

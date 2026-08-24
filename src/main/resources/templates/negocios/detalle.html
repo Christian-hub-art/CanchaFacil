@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle del negocio</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="'Negocio: ' + ${negocio.nombre}">Negocio</h2>
+
+    <dl>
+        <dt>Id</dt><dd th:text="${negocio.id}">1</dd>
+        <dt>NIT</dt><dd th:text="${negocio.nit}">900</dd>
+        <dt>Direccion</dt><dd th:text="${negocio.direccion}">Calle 1</dd>
+        <dt>Descripcion</dt><dd th:text="${negocio.descripcion}">-</dd>
+        <dt>Administrador</dt>
+        <dd th:text="${negocio.administrador != null} ? ${negocio.administrador.nombre} : 'Sin asignar'">Juan</dd>
+    </dl>
+
+    <p>
+        <a class="boton" th:href="@{/espacios}">Ver espacios</a>
+        <a class="boton gris" th:href="@{/negocios/update/{id}(id=${negocio.id})}">Editar</a>
+        <a class="boton gris" th:href="@{/negocios}">Volver</a>
+    </p>
+</main>
+
+</body>
+</html>

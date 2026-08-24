@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle del pago</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="'Pago #' + ${pago.id}">Pago</h2>
+
+    <dl>
+        <dt>Reserva</dt><dd th:text="${pago.reserva != null} ? ${pago.reserva.id} : '-'">1</dd>
+        <dt>Monto</dt><dd th:text="${pago.monto}">50000</dd>
+        <dt>Metodo</dt><dd th:text="${pago.metodoPago}">Tarjeta</dd>
+        <dt>Estado</dt><dd th:text="${pago.estado}">PENDIENTE</dd>
+        <dt>Fecha</dt><dd th:text="${pago.fechaPago}">2026-08-24</dd>
+        <dt>Referencia</dt><dd th:text="${pago.referencia}">REF-1</dd>
+    </dl>
+
+    <p>
+        <a class="boton" th:href="@{/pagos/estado/{id}(id=${pago.id}, valor='APROBADO')}">Aprobar</a>
+        <a class="boton gris" th:href="@{/pagos/estado/{id}(id=${pago.id}, valor='REEMBOLSADO')}">Reembolsar</a>
+        <a class="boton gris" th:href="@{/pagos/update/{id}(id=${pago.id})}">Editar</a>
+        <a class="boton gris" th:href="@{/pagos}">Volver</a>
+    </p>
+</main>
+
+</body>
+</html>

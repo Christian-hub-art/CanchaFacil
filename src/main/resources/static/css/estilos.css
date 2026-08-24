@@ -1,0 +1,122 @@
+:root {
+    --verde: #1b7f4b;
+    --verde-oscuro: #14603a;
+    --gris: #f4f6f8;
+    --borde: #d9dee3;
+    --texto: #22272b;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--gris);
+    color: var(--texto);
+}
+
+header {
+    background: var(--verde);
+    color: #fff;
+    padding: 1rem 2rem;
+}
+
+header h1 { margin: 0 0 .5rem; font-size: 1.4rem; }
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    margin-right: 1rem;
+    font-size: .95rem;
+}
+
+nav a:hover { text-decoration: underline; }
+
+main {
+    max-width: 1000px;
+    margin: 2rem auto;
+    background: #fff;
+    padding: 1.5rem 2rem;
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+}
+
+h2 { margin-top: 0; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th, td {
+    border-bottom: 1px solid var(--borde);
+    padding: .6rem .5rem;
+    text-align: left;
+    font-size: .93rem;
+}
+
+th { background: var(--gris); }
+
+.boton {
+    display: inline-block;
+    background: var(--verde);
+    color: #fff;
+    padding: .45rem .9rem;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: .9rem;
+}
+
+.boton:hover { background: var(--verde-oscuro); }
+
+.boton.gris { background: #6b7780; }
+.boton.rojo { background: #b3352b; }
+
+.acciones a { margin-right: .4rem; }
+
+form label {
+    display: block;
+    margin-top: .9rem;
+    font-weight: 600;
+    font-size: .9rem;
+}
+
+form input, form select, form textarea {
+    width: 100%;
+    padding: .5rem;
+    margin-top: .25rem;
+    border: 1px solid var(--borde);
+    border-radius: 5px;
+    font-size: .95rem;
+}
+
+.error {
+    background: #fdecea;
+    border: 1px solid #f5c2bd;
+    color: #8a231c;
+    padding: .7rem 1rem;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+}
+
+.vacio { color: #6b7780; font-style: italic; }
+
+.tarjetas { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+
+.tarjeta {
+    flex: 1 1 180px;
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+    padding: 1rem;
+    text-decoration: none;
+    color: var(--texto);
+}
+
+.tarjeta:hover { border-color: var(--verde); }
+.tarjeta span { display: block; font-size: 1.8rem; font-weight: 700; color: var(--verde); }
+
+dl dt { font-weight: 600; margin-top: .7rem; }
+dl dd { margin: .2rem 0 0; }

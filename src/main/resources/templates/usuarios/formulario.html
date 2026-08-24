@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${accion}">Usuario</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="${accion}">Crear usuario</h2>
+
+    <div class="error" th:if="${error}" th:text="${error}"></div>
+
+    <form th:action="@{/usuarios/add}" th:object="${usuario}" method="post">
+        <!-- El id viaja oculto: si viene lleno, el servicio actualiza en vez de crear -->
+        <input type="hidden" th:field="*{id}">
+
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" th:field="*{nombre}" required>
+
+        <label for="email">Email</label>
+        <input type="email" id="email" th:field="*{email}" required>
+
+        <label for="password">Contrasena</label>
+        <input type="password" id="password" th:field="*{password}" required>
+
+        <label for="telefono">Telefono</label>
+        <input type="text" id="telefono" th:field="*{telefono}">
+
+        <label for="rol">Rol</label>
+        <select id="rol" th:field="*{rol}" required>
+            <option value="">-- Seleccione --</option>
+            <option th:each="r : ${roles}" th:value="${r}" th:text="${r}">CLIENTE</option>
+        </select>
+
+        <p>
+            <button class="boton" type="submit">Guardar</button>
+            <a class="boton gris" th:href="@{/usuarios}">Cancelar</a>
+        </p>
+    </form>
+</main>
+
+</body>
+</html>

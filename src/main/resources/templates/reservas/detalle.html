@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle de la reserva</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="'Reserva #' + ${reserva.id}">Reserva</h2>
+
+    <dl>
+        <dt>Usuario</dt><dd th:text="${reserva.usuario != null} ? ${reserva.usuario.nombre} : '-'">Juan</dd>
+        <dt>Espacio</dt><dd th:text="${reserva.espacio != null} ? ${reserva.espacio.nombre} : '-'">Cancha 1</dd>
+        <dt>Fecha</dt><dd th:text="${reserva.fecha}">2026-09-01</dd>
+        <dt>Horario</dt><dd th:text="${reserva.horaInicio} + ' - ' + ${reserva.horaFin}">18:00 - 19:00</dd>
+        <dt>Estado</dt><dd th:text="${reserva.estado}">PENDIENTE</dd>
+        <dt>Creada el</dt><dd th:text="${reserva.fechaCreacion}">2026-08-24</dd>
+        <dt>Pago</dt>
+        <dd th:text="${reserva.pago != null} ? ${reserva.pago.estado} + ' - ' + ${reserva.pago.monto} : 'Sin pago registrado'">-</dd>
+        <dt>Calificacion</dt>
+        <dd th:text="${reserva.calificacion != null} ? ${reserva.calificacion.puntuacion} + '/5' : 'Sin calificar'">-</dd>
+    </dl>
+
+    <p>
+        <a class="boton" th:href="@{/pagos/add}">Registrar pago</a>
+        <a class="boton" th:href="@{/calificaciones/add}">Calificar</a>
+        <a class="boton gris" th:href="@{/reservas/update/{id}(id=${reserva.id})}">Editar</a>
+        <a class="boton gris" th:href="@{/reservas}">Volver</a>
+    </p>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle de la notificacion</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="'Notificacion #' + ${notificacion.id}">Notificacion</h2>
+
+    <dl>
+        <dt>Usuario</dt><dd th:text="${notificacion.usuario != null} ? ${notificacion.usuario.nombre} : '-'">Juan</dd>
+        <dt>Tipo</dt><dd th:text="${notificacion.tipo}">RESERVA</dd>
+        <dt>Mensaje</dt><dd th:text="${notificacion.mensaje}">Su reserva fue confirmada</dd>
+        <dt>Fecha</dt><dd th:text="${notificacion.fecha}">2026-08-24</dd>
+        <dt>Leida</dt><dd th:text="${notificacion.leido} ? 'Si' : 'No'">No</dd>
+    </dl>
+
+    <p>
+        <a class="boton" th:href="@{/notificaciones/leer/{id}(id=${notificacion.id})}">Marcar como leida</a>
+        <a class="boton gris" th:href="@{/notificaciones/update/{id}(id=${notificacion.id})}">Editar</a>
+        <a class="boton gris" th:href="@{/notificaciones}">Volver</a>
+    </p>
+</main>
+
+</body>
+</html>

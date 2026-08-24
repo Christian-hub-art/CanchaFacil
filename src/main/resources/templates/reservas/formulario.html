@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${accion}">Reserva</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="${accion}">Crear reserva</h2>
+
+    <div class="error" th:if="${error}" th:text="${error}"></div>
+    <p class="vacio" th:if="${#lists.isEmpty(usuarios) or #lists.isEmpty(espacios)}">
+        Necesita al menos un usuario y un espacio para poder reservar.
+    </p>
+
+    <form th:action="@{/reservas/add}" th:object="${reserva}" method="post">
+        <input type="hidden" th:field="*{id}">
+
+        <label for="usuarioId">Usuario</label>
+        <select id="usuarioId" name="usuarioId" required>
+            <option value="">-- Seleccione --</option>
+            <option th:each="u : ${usuarios}"
+                    th:value="${u.id}"
+                    th:text="${u.nombre}"
+                    th:selected="${reserva.usuario != null and reserva.usuario.id == u.id}">Juan</option>
+        </select>
+
+        <label for="espacioId">Espacio</label>
+        <select id="espacioId" name="espacioId" required>
+            <option value="">-- Seleccione --</option>
+            <option th:each="e : ${espacios}"
+                    th:value="${e.id}"
+                    th:text="${e.nombre} + ' (' + ${e.tipoDeporte} + ')'"
+                    th:selected="${reserva.espacio != null and reserva.espacio.id == e.id}">Cancha 1</option>
+        </select>
+
+        <label for="fecha">Fecha</label>
+        <input type="date" id="fecha" th:field="*{fecha}" required>
+
+        <label for="horaInicio">Hora de inicio</label>
+        <input type="time" id="horaInicio" th:field="*{horaInicio}" required>
+
+        <label for="horaFin">Hora de fin</label>
+        <input type="time" id="horaFin" th:field="*{horaFin}" required>
+
+        <p>
+            <button class="boton" type="submit">Guardar</button>
+            <a class="boton gris" th:href="@{/reservas}">Cancelar</a>
+        </p>
+    </form>
+</main>
+
+</body>
+</html>

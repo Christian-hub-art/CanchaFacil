@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>CanchaFacil</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2>Panel general</h2>
+    <p>Reservas de espacios deportivos. Los datos se guardan en memoria mientras la aplicacion este encendida.</p>
+
+    <div class="tarjetas">
+        <a class="tarjeta" th:href="@{/usuarios}">
+            <span th:text="${totalUsuarios}">0</span> Usuarios
+        </a>
+        <a class="tarjeta" th:href="@{/negocios}">
+            <span th:text="${totalNegocios}">0</span> Negocios
+        </a>
+        <a class="tarjeta" th:href="@{/espacios}">
+            <span th:text="${totalEspacios}">0</span> Espacios
+        </a>
+        <a class="tarjeta" th:href="@{/reservas}">
+            <span th:text="${totalReservas}">0</span> Reservas
+        </a>
+    </div>
+    <div class="tarjetas">
+        <a class="tarjeta" th:href="@{/pagos}">
+            <span th:text="${totalPagos}">0</span> Pagos
+        </a>
+        <a class="tarjeta" th:href="@{/calificaciones}">
+            <span th:text="${totalCalificaciones}">0</span> Calificaciones
+        </a>
+        <a class="tarjeta" th:href="@{/notificaciones}">
+            <span th:text="${totalNotificaciones}">0</span> Notificaciones
+        </a>
+    </div>
+
+    <h2 style="margin-top:2rem">Como empezar</h2>
+    <ol>
+        <li>Crear un <a th:href="@{/usuarios/add}">usuario</a> con rol ADMINISTRADOR.</li>
+        <li>Crear un <a th:href="@{/negocios/add}">negocio</a> y asignarle ese administrador.</li>
+        <li>Agregar <a th:href="@{/espacios/add}">espacios</a> al negocio.</li>
+        <li>Registrar <a th:href="@{/reservas/add}">reservas</a>, luego su pago y su calificacion.</li>
+    </ol>
+</main>
+
+</body>
+</html>

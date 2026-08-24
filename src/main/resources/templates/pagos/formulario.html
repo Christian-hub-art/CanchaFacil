@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${accion}">Pago</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="${accion}">Registrar pago</h2>
+
+    <div class="error" th:if="${error}" th:text="${error}"></div>
+    <p class="vacio" th:if="${#lists.isEmpty(reservas)}">Primero cree una reserva.</p>
+
+    <form th:action="@{/pagos/add}" th:object="${pago}" method="post">
+        <input type="hidden" th:field="*{id}">
+
+        <label for="reservaId">Reserva</label>
+        <select id="reservaId" name="reservaId" required>
+            <option value="">-- Seleccione --</option>
+            <option th:each="r : ${reservas}"
+                    th:value="${r.id}"
+                    th:text="'#' + ${r.id} + ' - ' + ${r.fecha} + ' ' + ${r.horaInicio}"
+                    th:selected="${pago.reserva != null and pago.reserva.id == r.id}">#1</option>
+        </select>
+
+        <label for="monto">Monto</label>
+        <input type="number" id="monto" th:field="*{monto}" step="0.01" min="0" required>
+
+        <label for="metodoPago">Metodo de pago</label>
+        <input type="text" id="metodoPago" th:field="*{metodoPago}" placeholder="Tarjeta, PSE, efectivo" required>
+
+        <label for="referencia">Referencia</label>
+        <input type="text" id="referencia" th:field="*{referencia}">
+
+        <p>
+            <button class="boton" type="submit">Guardar</button>
+            <a class="boton gris" th:href="@{/pagos}">Cancelar</a>
+        </p>
+    </form>
+</main>
+
+</body>
+</html>

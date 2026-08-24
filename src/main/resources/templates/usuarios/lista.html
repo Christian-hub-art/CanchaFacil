@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Usuarios</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="${titulo}">Usuarios</h2>
+
+    <a class="boton" th:href="@{/usuarios/add}">Nuevo usuario</a>
+
+    <form th:action="@{/usuarios}" method="get" style="margin-top:1rem">
+        <label for="nombre">Buscar por nombre</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Ej: Juan">
+        <button class="boton" type="submit" style="margin-top:.6rem">Buscar</button>
+    </form>
+
+    <p class="vacio" th:if="${#lists.isEmpty(usuarios)}">Todavia no hay usuarios registrados.</p>
+
+    <table th:unless="${#lists.isEmpty(usuarios)}">
+        <thead>
+        <tr>
+            <th>Id</th><th>Nombre</th><th>Email</th><th>Telefono</th><th>Rol</th><th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="usuario : ${usuarios}">
+            <td th:text="${usuario.id}">1</td>
+            <td th:text="${usuario.nombre}">Juan</td>
+            <td th:text="${usuario.email}">juan@mail.com</td>
+            <td th:text="${usuario.telefono}">300</td>
+            <td th:text="${usuario.rol}">CLIENTE</td>
+            <td class="acciones">
+                <a class="boton" th:href="@{/usuarios/{id}(id=${usuario.id})}">Ver</a>
+                <a class="boton gris" th:href="@{/usuarios/update/{id}(id=${usuario.id})}">Editar</a>
+                <a class="boton rojo" th:href="@{/usuarios/delete/{id}(id=${usuario.id})}">Eliminar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+
+</body>
+</html>

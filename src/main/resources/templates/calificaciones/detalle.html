@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle de la calificacion</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="'Calificacion #' + ${calificacion.id}">Calificacion</h2>
+
+    <dl>
+        <dt>Usuario</dt><dd th:text="${calificacion.usuario != null} ? ${calificacion.usuario.nombre} : '-'">Juan</dd>
+        <dt>Espacio</dt><dd th:text="${calificacion.espacio != null} ? ${calificacion.espacio.nombre} : '-'">Cancha 1</dd>
+        <dt>Reserva</dt><dd th:text="${calificacion.reserva != null} ? ${calificacion.reserva.id} : '-'">1</dd>
+        <dt>Puntuacion</dt><dd th:text="${calificacion.puntuacion} + '/5'">5/5</dd>
+        <dt>Comentario</dt><dd th:text="${calificacion.comentario}">Excelente</dd>
+        <dt>Fecha</dt><dd th:text="${calificacion.fecha}">2026-08-24</dd>
+    </dl>
+
+    <p>
+        <a class="boton gris" th:href="@{/calificaciones/update/{id}(id=${calificacion.id})}">Editar</a>
+        <a class="boton gris" th:href="@{/calificaciones}">Volver</a>
+    </p>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle del usuario</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="'Usuario: ' + ${usuario.nombre}">Usuario</h2>
+
+    <dl>
+        <dt>Id</dt><dd th:text="${usuario.id}">1</dd>
+        <dt>Email</dt><dd th:text="${usuario.email}">juan@mail.com</dd>
+        <dt>Telefono</dt><dd th:text="${usuario.telefono}">300</dd>
+        <dt>Rol</dt><dd th:text="${usuario.rol}">CLIENTE</dd>
+        <dt>Fecha de registro</dt><dd th:text="${usuario.fechaRegistro}">2026-01-01</dd>
+    </dl>
+
+    <p>
+        <a class="boton" th:href="@{/reservas(usuarioId=${usuario.id})}">Ver sus reservas</a>
+        <a class="boton" th:href="@{/notificaciones(usuarioId=${usuario.id})}">Ver sus notificaciones</a>
+        <a class="boton gris" th:href="@{/usuarios/update/{id}(id=${usuario.id})}">Editar</a>
+        <a class="boton gris" th:href="@{/usuarios}">Volver</a>
+    </p>
+</main>
+
+</body>
+</html>

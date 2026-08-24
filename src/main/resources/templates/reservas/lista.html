@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Reservas</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="${titulo}">Reservas</h2>
+
+    <a class="boton" th:href="@{/reservas/add}">Nueva reserva</a>
+
+    <form th:action="@{/reservas}" method="get" style="margin-top:1rem">
+        <label for="estado">Filtrar por estado</label>
+        <select id="estado" name="estado">
+            <option value="PENDIENTE">PENDIENTE</option>
+            <option value="CONFIRMADA">CONFIRMADA</option>
+            <option value="CANCELADA">CANCELADA</option>
+            <option value="COMPLETADA">COMPLETADA</option>
+        </select>
+        <button class="boton" type="submit" style="margin-top:.6rem">Filtrar</button>
+    </form>
+
+    <p class="vacio" th:if="${#lists.isEmpty(reservas)}">No hay reservas para mostrar.</p>
+
+    <table th:unless="${#lists.isEmpty(reservas)}">
+        <thead>
+        <tr><th>Id</th><th>Usuario</th><th>Espacio</th><th>Fecha</th><th>Horario</th><th>Estado</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="reserva : ${reservas}">
+            <td th:text="${reserva.id}">1</td>
+            <td th:text="${reserva.usuario != null} ? ${reserva.usuario.nombre} : '-'">Juan</td>
+            <td th:text="${reserva.espacio != null} ? ${reserva.espacio.nombre} : '-'">Cancha 1</td>
+            <td th:text="${reserva.fecha}">2026-09-01</td>
+            <td th:text="${reserva.horaInicio} + ' - ' + ${reserva.horaFin}">18:00 - 19:00</td>
+            <td th:text="${reserva.estado}">PENDIENTE</td>
+            <td class="acciones">
+                <a class="boton" th:href="@{/reservas/{id}(id=${reserva.id})}">Ver</a>
+                <a class="boton gris" th:href="@{/reservas/update/{id}(id=${reserva.id})}">Editar</a>
+                <a class="boton gris" th:href="@{/reservas/cancelar/{id}(id=${reserva.id})}">Cancelar</a>
+                <a class="boton rojo" th:href="@{/reservas/delete/{id}(id=${reserva.id})}">Eliminar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+
+</body>
+</html>

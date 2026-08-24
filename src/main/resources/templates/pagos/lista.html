@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Pagos</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="${titulo}">Pagos</h2>
+
+    <a class="boton" th:href="@{/pagos/add}">Registrar pago</a>
+
+    <form th:action="@{/pagos}" method="get" style="margin-top:1rem">
+        <label for="estado">Filtrar por estado</label>
+        <select id="estado" name="estado">
+            <option value="PENDIENTE">PENDIENTE</option>
+            <option value="APROBADO">APROBADO</option>
+            <option value="RECHAZADO">RECHAZADO</option>
+            <option value="REEMBOLSADO">REEMBOLSADO</option>
+        </select>
+        <button class="boton" type="submit" style="margin-top:.6rem">Filtrar</button>
+    </form>
+
+    <p class="vacio" th:if="${#lists.isEmpty(pagos)}">No hay pagos para mostrar.</p>
+
+    <table th:unless="${#lists.isEmpty(pagos)}">
+        <thead>
+        <tr><th>Id</th><th>Reserva</th><th>Monto</th><th>Metodo</th><th>Estado</th><th>Referencia</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="pago : ${pagos}">
+            <td th:text="${pago.id}">1</td>
+            <td th:text="${pago.reserva != null} ? ${pago.reserva.id} : '-'">1</td>
+            <td th:text="${pago.monto}">50000</td>
+            <td th:text="${pago.metodoPago}">Tarjeta</td>
+            <td th:text="${pago.estado}">PENDIENTE</td>
+            <td th:text="${pago.referencia}">REF-1</td>
+            <td class="acciones">
+                <a class="boton" th:href="@{/pagos/{id}(id=${pago.id})}">Ver</a>
+                <a class="boton" th:href="@{/pagos/estado/{id}(id=${pago.id}, valor='APROBADO')}">Aprobar</a>
+                <a class="boton gris" th:href="@{/pagos/estado/{id}(id=${pago.id}, valor='RECHAZADO')}">Rechazar</a>
+                <a class="boton rojo" th:href="@{/pagos/delete/{id}(id=${pago.id})}">Eliminar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+
+</body>
+</html>

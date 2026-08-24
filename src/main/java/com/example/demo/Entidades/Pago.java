@@ -1,21 +1,22 @@
-package com.reservasdeportivas.model;
+package com.example.demo.Entidades;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
-// lombok
-// getters, setters, toString, equals
 @Data
+@ToString(exclude = "reserva")
+@EqualsAndHashCode(exclude = "reserva")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Pago {
 
-    private UUID id;
+    private Long id;
     private Reserva reserva;
     private BigDecimal monto;
     private String metodoPago;

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Fragmento reutilizable: se inserta en todas las paginas con th:replace -->
+<header th:fragment="cabecera">
+    <h1>CanchaFacil</h1>
+    <nav>
+        <a th:href="@{/}">Inicio</a>
+        <a th:href="@{/usuarios}">Usuarios</a>
+        <a th:href="@{/negocios}">Negocios</a>
+        <a th:href="@{/espacios}">Espacios</a>
+        <a th:href="@{/reservas}">Reservas</a>
+        <a th:href="@{/pagos}">Pagos</a>
+        <a th:href="@{/calificaciones}">Calificaciones</a>
+        <a th:href="@{/notificaciones}">Notificaciones</a>
+    </nav>
+</header>
+
+</body>
+</html>

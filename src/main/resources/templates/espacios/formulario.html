@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${accion}">Espacio</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+
+<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+
+<main>
+    <h2 th:text="${accion}">Crear espacio</h2>
+
+    <div class="error" th:if="${error}" th:text="${error}"></div>
+    <p class="vacio" th:if="${#lists.isEmpty(negocios)}">
+        Primero cree un negocio: todo espacio pertenece a uno.
+    </p>
+
+    <form th:action="@{/espacios/add}" th:object="${espacio}" method="post">
+        <input type="hidden" th:field="*{id}">
+
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" th:field="*{nombre}" required>
+
+        <label for="tipoDeporte">Tipo de deporte</label>
+        <input type="text" id="tipoDeporte" th:field="*{tipoDeporte}" required>
+
+        <label for="precioHora">Precio por hora</label>
+        <input type="number" id="precioHora" th:field="*{precioHora}" step="0.01" min="0" required>
+
+        <label for="capacidad">Capacidad</label>
+        <input type="number" id="capacidad" th:field="*{capacidad}" min="1">
+
+        <label for="descripcion">Descripcion</label>
+        <textarea id="descripcion" th:field="*{descripcion}" rows="3"></textarea>
+
+        <label for="negocioId">Negocio</label>
+        <select id="negocioId" name="negocioId" required>
+            <option value="">-- Seleccione --</option>
+            <option th:each="n : ${negocios}"
+                    th:value="${n.id}"
+                    th:text="${n.nombre}"
+                    th:selected="${espacio.negocio != null and espacio.negocio.id == n.id}">Canchas</option>
+        </select>
+
+        <p>
+            <button class="boton" type="submit">Guardar</button>
+            <a class="boton gris" th:href="@{/espacios}">Cancelar</a>
+        </p>
+    </form>
+</main>
+
+</body>
+</html>

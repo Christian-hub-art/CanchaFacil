@@ -5,12 +5,14 @@ import com.example.demo.Entidades.Reserva;
 import com.example.demo.Repositorios.PagoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class PagoService {
 
     /** Estados posibles de un pago. */
@@ -33,7 +35,7 @@ public class PagoService {
     }
 
     public Pago buscarPorId(Long id) {
-        return pagoRepository.findById(id);
+        return pagoRepository.findById(id).orElse(null);
     }
 
     public Pago buscarPorReserva(Long reservaId) {
@@ -41,13 +43,14 @@ public class PagoService {
     }
 
     public List<Pago> listarPorEstado(String estado) {
-        return pagoRepository.findByEstado(estado);
+        return pagoRepository.findByEstadoIgnoreCase(estado);
     }
 
     /**
      * Reglas de negocio: el monto no puede ser negativo y una reserva solo puede
      * tener un pago asociado.
      */
+    @Transactional
     public Pago guardar(Pago pago, Long reservaId) {
         if (pago.getMonto() == null || pago.getMonto().compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("El monto del pago no puede ser negativo");
@@ -63,20 +66,23 @@ public class PagoService {
             throw new IllegalArgumentException("La reserva " + reservaId + " ya tiene un pago registrado");
         }
 
-        pago.setReserva(reserva);
-
-        if (pago.getId() == null) {
+        Pago actual = pago.getId() == null ? null : buscarPorId(pago.getId());
+        if (actual == null) {
+            pago.setReserva(reserva);
             pago.setFechaPago(LocalDateTime.now());
             pago.setEstado(PENDIENTE);
-        } else {
-            Pago actual = pagoRepository.findById(pago.getId());
-            if (actual != null) {
-                pago.setFechaPago(actual.getFechaPago());
-                pago.setEstado(actual.getEstado());
-            }
+            Pago guardado = pagoRepository.save(pago);
+            reserva.setPago(guardado);
+            return guardado;
         }
 
-        Pago guardado = pagoRepository.save(pago);
+        // Edicion: la fecha y el estado no se tocan desde el formulario; el estado
+        // se cambia con cambiarEstado().
+        actual.setReserva(reserva);
+        actual.setMonto(pago.getMonto());
+        actual.setMetodoPago(pago.getMetodoPago());
+        actual.setReferencia(pago.getReferencia());
+        Pago guardado = pagoRepository.save(actual);
         reserva.setPago(guardado);
         return guardado;
     }
@@ -85,8 +91,9 @@ public class PagoService {
      * Al aprobar el pago la reserva queda confirmada; si se rechaza o se
      * reembolsa, la reserva se cancela.
      */
+    @Transactional
     public Pago cambiarEstado(Long id, String estado) {
-        Pago pago = pagoRepository.findById(id);
+        Pago pago = buscarPorId(id);
         if (pago == null) {
             throw new IllegalArgumentException("El pago con id " + id + " no existe");
         }
@@ -103,11 +110,17 @@ public class PagoService {
         return pago;
     }
 
+    @Transactional
     public void eliminar(Long id) {
-        Pago pago = pagoRepository.findById(id);
-        if (pago != null && pago.getReserva() != null) {
+        Pago pago = buscarPorId(id);
+        if (pago == null) {
+            return;
+        }
+        // Se desengancha del lado inverso para que la reserva en memoria quede
+        // coherente; la fila que se borra es la de pagos.
+        if (pago.getReserva() != null) {
             pago.getReserva().setPago(null);
         }
-        pagoRepository.deleteById(id);
+        pagoRepository.delete(pago);
     }
 }

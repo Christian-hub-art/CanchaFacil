@@ -5,11 +5,13 @@ import com.example.demo.Entidades.Usuario;
 import com.example.demo.Repositorios.NotificacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class NotificacionService {
 
     private final NotificacionRepository notificacionRepository;
@@ -26,7 +28,7 @@ public class NotificacionService {
     }
 
     public Notificacion buscarPorId(Long id) {
-        return notificacionRepository.findById(id);
+        return notificacionRepository.findById(id).orElse(null);
     }
 
     public List<Notificacion> listarPorUsuario(Long usuarioId) {
@@ -38,28 +40,31 @@ public class NotificacionService {
     }
 
     /** Toda notificacion nace no leida y con la fecha del momento en que se crea. */
+    @Transactional
     public Notificacion guardar(Notificacion notificacion, Long usuarioId) {
         Usuario usuario = usuarioService.buscarPorId(usuarioId);
         if (usuario == null) {
             throw new IllegalArgumentException("El usuario con id " + usuarioId + " no existe");
         }
-        notificacion.setUsuario(usuario);
 
-        if (notificacion.getId() == null) {
+        Notificacion actual = notificacion.getId() == null ? null : buscarPorId(notificacion.getId());
+        if (actual == null) {
+            notificacion.setUsuario(usuario);
             notificacion.setFecha(LocalDateTime.now());
             notificacion.setLeido(false);
-        } else {
-            Notificacion actual = notificacionRepository.findById(notificacion.getId());
-            if (actual != null) {
-                notificacion.setFecha(actual.getFecha());
-                notificacion.setLeido(actual.getLeido());
-            }
+            return notificacionRepository.save(notificacion);
         }
-        return notificacionRepository.save(notificacion);
+
+        // Edicion: la fecha y el estado de lectura se conservan.
+        actual.setUsuario(usuario);
+        actual.setTipo(notificacion.getTipo());
+        actual.setMensaje(notificacion.getMensaje());
+        return notificacionRepository.save(actual);
     }
 
+    @Transactional
     public Notificacion marcarComoLeida(Long id) {
-        Notificacion notificacion = notificacionRepository.findById(id);
+        Notificacion notificacion = buscarPorId(id);
         if (notificacion == null) {
             throw new IllegalArgumentException("La notificacion con id " + id + " no existe");
         }
@@ -67,6 +72,7 @@ public class NotificacionService {
         return notificacionRepository.save(notificacion);
     }
 
+    @Transactional
     public void eliminar(Long id) {
         notificacionRepository.deleteById(id);
     }

@@ -6,12 +6,14 @@ import com.example.demo.Entidades.Usuario;
 import com.example.demo.Repositorios.ReservaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservaService {
 
     /** Estados posibles de una reserva. */
@@ -38,7 +40,7 @@ public class ReservaService {
     }
 
     public Reserva buscarPorId(Long id) {
-        return reservaRepository.findById(id);
+        return reservaRepository.findById(id).orElse(null);
     }
 
     public List<Reserva> listarPorUsuario(Long usuarioId) {
@@ -50,7 +52,7 @@ public class ReservaService {
     }
 
     public List<Reserva> listarPorEstado(String estado) {
-        return reservaRepository.findByEstado(estado);
+        return reservaRepository.findByEstadoIgnoreCase(estado);
     }
 
     /**
@@ -58,6 +60,7 @@ public class ReservaService {
      * 1. La hora de inicio debe ser anterior a la hora de fin.
      * 2. El espacio no puede tener otra reserva activa que se cruce con ese horario.
      */
+    @Transactional
     public Reserva guardar(Reserva reserva, Long usuarioId, Long espacioId) {
         Usuario usuario = usuarioService.buscarPorId(usuarioId);
         if (usuario == null) {
@@ -77,26 +80,28 @@ public class ReservaService {
             throw new IllegalArgumentException("El espacio ya esta reservado en ese horario");
         }
 
-        reserva.setUsuario(usuario);
-        reserva.setEspacio(espacio);
-
-        if (reserva.getId() == null) {
+        Reserva actual = reserva.getId() == null ? null : buscarPorId(reserva.getId());
+        if (actual == null) {
+            reserva.setUsuario(usuario);
+            reserva.setEspacio(espacio);
             reserva.setFechaCreacion(LocalDateTime.now());
             reserva.setEstado(PENDIENTE);
-        } else {
-            Reserva actual = reservaRepository.findById(reserva.getId());
-            if (actual != null) {
-                reserva.setFechaCreacion(actual.getFechaCreacion());
-                reserva.setEstado(actual.getEstado());
-                reserva.setPago(actual.getPago());
-                reserva.setCalificacion(actual.getCalificacion());
-            }
+            return reservaRepository.save(reserva);
         }
-        return reservaRepository.save(reserva);
+
+        // Edicion: fecha de creacion, estado, pago y calificacion se conservan
+        // porque se escribe sobre la fila que ya existe.
+        actual.setUsuario(usuario);
+        actual.setEspacio(espacio);
+        actual.setFecha(reserva.getFecha());
+        actual.setHoraInicio(reserva.getHoraInicio());
+        actual.setHoraFin(reserva.getHoraFin());
+        return reservaRepository.save(actual);
     }
 
+    @Transactional
     public Reserva cambiarEstado(Long id, String estado) {
-        Reserva reserva = reservaRepository.findById(id);
+        Reserva reserva = buscarPorId(id);
         if (reserva == null) {
             throw new IllegalArgumentException("La reserva con id " + id + " no existe");
         }
@@ -104,10 +109,12 @@ public class ReservaService {
         return reservaRepository.save(reserva);
     }
 
+    @Transactional
     public Reserva cancelar(Long id) {
         return cambiarEstado(id, CANCELADA);
     }
 
+    @Transactional
     public void eliminar(Long id) {
         reservaRepository.deleteById(id);
     }

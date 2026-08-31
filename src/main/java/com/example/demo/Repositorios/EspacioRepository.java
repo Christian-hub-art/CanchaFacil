@@ -1,12 +1,15 @@
 package com.example.demo.Repositorios;
 
 import com.example.demo.Entidades.Espacio;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface EspacioRepository extends CrudRepository<Espacio> {
+@Repository
+public interface EspacioRepository extends JpaRepository<Espacio, Long> {
 
     List<Espacio> findByNegocioId(Long negocioId);
 
-    List<Espacio> findByTipoDeporte(String tipoDeporte);
+    List<Espacio> findByTipoDeporteIgnoreCase(String tipoDeporte);
 }

@@ -5,11 +5,13 @@ import com.example.demo.Entidades.Reserva;
 import com.example.demo.Repositorios.CalificacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class CalificacionService {
 
     private final CalificacionRepository calificacionRepository;
@@ -26,7 +28,7 @@ public class CalificacionService {
     }
 
     public Calificacion buscarPorId(Long id) {
-        return calificacionRepository.findById(id);
+        return calificacionRepository.findById(id).orElse(null);
     }
 
     public List<Calificacion> listarPorEspacio(Long espacioId) {
@@ -50,6 +52,7 @@ public class CalificacionService {
      * Reglas de negocio: la puntuacion va de 1 a 5 y cada reserva se califica
      * una sola vez. La calificacion hereda el usuario y el espacio de la reserva.
      */
+    @Transactional
     public Calificacion guardar(Calificacion calificacion, Long reservaId) {
         if (calificacion.getPuntuacion() == null
                 || calificacion.getPuntuacion() < 1 || calificacion.getPuntuacion() > 5) {
@@ -66,29 +69,37 @@ public class CalificacionService {
             throw new IllegalArgumentException("La reserva " + reservaId + " ya fue calificada");
         }
 
-        calificacion.setReserva(reserva);
-        calificacion.setUsuario(reserva.getUsuario());
-        calificacion.setEspacio(reserva.getEspacio());
-
-        if (calificacion.getId() == null) {
+        Calificacion actual = calificacion.getId() == null ? null : buscarPorId(calificacion.getId());
+        if (actual == null) {
+            calificacion.setReserva(reserva);
+            calificacion.setUsuario(reserva.getUsuario());
+            calificacion.setEspacio(reserva.getEspacio());
             calificacion.setFecha(LocalDateTime.now());
-        } else {
-            Calificacion actual = calificacionRepository.findById(calificacion.getId());
-            if (actual != null) {
-                calificacion.setFecha(actual.getFecha());
-            }
+            Calificacion guardada = calificacionRepository.save(calificacion);
+            reserva.setCalificacion(guardada);
+            return guardada;
         }
 
-        Calificacion guardada = calificacionRepository.save(calificacion);
+        // Edicion: la fecha original se conserva porque se escribe sobre la fila existente.
+        actual.setReserva(reserva);
+        actual.setUsuario(reserva.getUsuario());
+        actual.setEspacio(reserva.getEspacio());
+        actual.setPuntuacion(calificacion.getPuntuacion());
+        actual.setComentario(calificacion.getComentario());
+        Calificacion guardada = calificacionRepository.save(actual);
         reserva.setCalificacion(guardada);
         return guardada;
     }
 
+    @Transactional
     public void eliminar(Long id) {
-        Calificacion calificacion = calificacionRepository.findById(id);
-        if (calificacion != null && calificacion.getReserva() != null) {
+        Calificacion calificacion = buscarPorId(id);
+        if (calificacion == null) {
+            return;
+        }
+        if (calificacion.getReserva() != null) {
             calificacion.getReserva().setCalificacion(null);
         }
-        calificacionRepository.deleteById(id);
+        calificacionRepository.delete(calificacion);
     }
 }

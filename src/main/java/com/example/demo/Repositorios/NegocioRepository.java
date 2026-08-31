@@ -1,14 +1,17 @@
 package com.example.demo.Repositorios;
 
 import com.example.demo.Entidades.Negocio;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface NegocioRepository extends CrudRepository<Negocio> {
+@Repository
+public interface NegocioRepository extends JpaRepository<Negocio, Long> {
 
-    Negocio findByNit(String nit);
+    Negocio findByNitIgnoreCase(String nit);
 
     List<Negocio> findByAdministradorId(Long administradorId);
 
-    List<Negocio> findByNombre(String nombre);
+    List<Negocio> findByNombreContainingIgnoreCase(String nombre);
 }

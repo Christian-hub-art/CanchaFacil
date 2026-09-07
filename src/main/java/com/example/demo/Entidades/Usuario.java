@@ -1,5 +1,9 @@
 package com.example.demo.Entidades;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,16 +14,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 // Lombok: @Data genera getters, setters, toString, equals y hashCode.
 // @NoArgsConstructor lo necesita Thymeleaf/Spring (y tambien JPA) para crear el objeto vacio.
@@ -63,6 +62,10 @@ public class Usuario {
     @Column(name = "fecha_registro")
     private LocalDateTime fechaRegistro;
 
+    
+    @Column(nullable = false, length = 60)
+    private String Direccion;
+
     // mappedBy = el dueno de la relacion es el campo "administrador" de Negocio,
     // o sea la columna administrador_id vive en la tabla negocios.
     @OneToMany(mappedBy = "administrador", cascade = CascadeType.ALL)
@@ -76,4 +79,5 @@ public class Usuario {
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
     private List<Notificacion> notificaciones = new ArrayList<>();
+    
 }

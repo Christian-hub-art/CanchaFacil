@@ -1,14 +1,15 @@
 package com.example.demo.Servicios;
 
-import com.example.demo.Entidades.Rol;
-import com.example.demo.Entidades.Usuario;
-import com.example.demo.Repositorios.UsuarioRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import com.example.demo.Entidades.Rol;
+import com.example.demo.Entidades.Usuario;
+import com.example.demo.Repositorios.UsuarioRepository;
 
 /**
  * Capa de servicio: aqui viven las reglas de negocio de los usuarios.
@@ -82,6 +83,7 @@ public class UsuarioService {
         actual.setPassword(usuario.getPassword());
         actual.setTelefono(usuario.getTelefono());
         actual.setRol(usuario.getRol());
+        actual.setDireccion(usuario.getDireccion());
         return usuarioRepository.save(actual);
     }
 

@@ -1,0 +1,29 @@
+<main class="contenedor-simple">
+  <h2>Reservas</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Usuario</th>
+        <th>Espacio</th>
+        <th>Fecha</th>
+        <th>Horario</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      @for (reserva of reservas; track reserva.id) {
+        <tr>
+          <td>{{ reserva.id }}</td>
+          <td>{{ reserva.usuario }}</td>
+          <td>{{ reserva.espacio }}</td>
+          <td>{{ reserva.fecha }}</td>
+          <td>{{ reserva.horaInicio }} - {{ reserva.horaFin }}</td>
+          <td>{{ reserva.estado }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</main>

@@ -9,39 +9,52 @@
 
 <header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
 
-<main>
-    <h2 th:text="${titulo}">Espacios</h2>
+<main class="contenedor-simple">
+    <h2 th:text="${titulo}">Canchas cerca de ti</h2>
+    <p style="color:var(--texto-suave); margin-top:-.4rem">Selecciona un deporte o busca por nombre para encontrar el espacio ideal.</p>
 
     <a class="boton" th:href="@{/espacios/add}">Nuevo espacio</a>
 
-    <form th:action="@{/espacios}" method="get" style="margin-top:1rem">
+    <form th:action="@{/espacios}" method="get" style="margin-top:1.25rem; max-width:420px">
         <label for="deporte">Filtrar por deporte</label>
         <input type="text" id="deporte" name="deporte" placeholder="Ej: futbol">
         <button class="boton" type="submit" style="margin-top:.6rem">Buscar</button>
     </form>
 
+    <div class="chips">
+        <span class="etiqueta-chips">Filtrar por:</span>
+        <a class="chip" th:classappend="${param.deporte == null} ? ' activo' : ''" th:href="@{/espacios}">Todas</a>
+        <a class="chip" th:classappend="${param.deporte != null and #strings.equalsIgnoreCase(param.deporte[0],'futbol 5')} ? ' activo' : ''" th:href="@{/espacios(deporte='futbol 5')}">Futbol 5</a>
+        <a class="chip" th:classappend="${param.deporte != null and #strings.equalsIgnoreCase(param.deporte[0],'futbol 8')} ? ' activo' : ''" th:href="@{/espacios(deporte='futbol 8')}">Futbol 8</a>
+        <a class="chip" th:classappend="${param.deporte != null and #strings.equalsIgnoreCase(param.deporte[0],'futbol 11')} ? ' activo' : ''" th:href="@{/espacios(deporte='futbol 11')}">Futbol 11</a>
+    </div>
+
     <p class="vacio" th:if="${#lists.isEmpty(espacios)}">Todavia no hay espacios registrados.</p>
 
-    <table th:unless="${#lists.isEmpty(espacios)}">
-        <thead>
-        <tr><th>Id</th><th>Nombre</th><th>Deporte</th><th>Precio/hora</th><th>Capacidad</th><th>Negocio</th><th>Acciones</th></tr>
-        </thead>
-        <tbody>
-        <tr th:each="espacio : ${espacios}">
-            <td th:text="${espacio.id}">1</td>
-            <td th:text="${espacio.nombre}">Cancha 1</td>
-            <td th:text="${espacio.tipoDeporte}">futbol</td>
-            <td th:text="${espacio.precioHora}">50000</td>
-            <td th:text="${espacio.capacidad}">10</td>
-            <td th:text="${espacio.negocio != null} ? ${espacio.negocio.nombre} : '-'">Canchas</td>
-            <td class="acciones">
-                <a class="boton" th:href="@{/espacios/{id}(id=${espacio.id})}">Ver</a>
-                <a class="boton gris" th:href="@{/espacios/update/{id}(id=${espacio.id})}">Editar</a>
-                <a class="boton rojo" th:href="@{/espacios/delete/{id}(id=${espacio.id})}">Eliminar</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="grid-canchas" th:unless="${#lists.isEmpty(espacios)}">
+        <article class="tarjeta-cancha" th:each="espacio : ${espacios}">
+            <div class="cubierta">
+                <span class="insignia disponible">Disponible</span>
+                <span class="insignia deporte" th:text="${espacio.tipoDeporte}">Futbol 5</span>
+            </div>
+            <div class="cuerpo">
+                <h3>
+                    <span th:text="${espacio.nombre}">Cancha 1</span>
+                    <span class="precio" th:text="'$' + ${espacio.precioHora} + '/h'">$50000/h</span>
+                </h3>
+                <div class="ubicacion">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+                    <span th:text="${espacio.negocio != null} ? ${espacio.negocio.nombre} : 'Sin negocio asignado'">Negocio</span>
+                    <span>&middot; capacidad <span th:text="${espacio.capacidad}">10</span></span>
+                </div>
+                <div class="acciones">
+                    <a class="boton" th:href="@{/espacios/{id}(id=${espacio.id})}">Ver</a>
+                    <a class="boton gris" th:href="@{/espacios/update/{id}(id=${espacio.id})}">Editar</a>
+                    <a class="boton rojo" th:href="@{/espacios/delete/{id}(id=${espacio.id})}">Eliminar</a>
+                </div>
+            </div>
+        </article>
+    </div>
 </main>
 
 </body>

@@ -9,24 +9,35 @@
 
 <header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
 
-<main>
-    <h2 th:text="'Usuario: ' + ${usuario.nombre}">Usuario</h2>
+<main class="contenedor-simple">
+    <h2>Mi perfil</h2>
+    <p style="color:var(--texto-suave); margin-top:-.4rem">Informacion de la cuenta y datos de contacto.</p>
 
-    <dl>
-        <dt>Id</dt><dd th:text="${usuario.id}">1</dd>
-        <dt>Email</dt><dd th:text="${usuario.email}">juan@mail.com</dd>
-        <dt>Telefono</dt><dd th:text="${usuario.telefono}">300</dd>
-        <dt>Rol</dt><dd th:text="${usuario.rol}">CLIENTE</dd>
-        <dt>Fecha de registro</dt><dd th:text="${usuario.fechaRegistro}">2026-01-01</dd>
-        <dt>Dirección</dt><dd th:text="${usuario.direccion}">Calle 47</dd>
-    </dl>
+    <div class="perfil">
+        <div class="avatar" th:text="${#strings.substring(usuario.nombre,0,1)}">J</div>
+        <div class="datos">
+            <h2 th:text="${usuario.nombre}">Juan</h2>
+            <div class="correo" th:text="${usuario.email}">juan@mail.com</div>
+            <span class="insignia-rol" th:text="${usuario.rol}">CLIENTE</span>
+        </div>
+    </div>
 
-    <p>
+    <div class="panel-info">
+        <h3>Informacion personal</h3>
+        <dl>
+            <dt>Id</dt><dd th:text="${usuario.id}">1</dd>
+            <dt>Telefono</dt><dd th:text="${usuario.telefono}">300</dd>
+            <dt>Direccion</dt><dd th:text="${usuario.direccion}">Calle 47</dd>
+            <dt>Fecha de registro</dt><dd th:text="${usuario.fechaRegistro}">2026-01-01</dd>
+        </dl>
+    </div>
+
+    <div class="perfil-acciones">
         <a class="boton" th:href="@{/reservas(usuarioId=${usuario.id})}">Ver sus reservas</a>
         <a class="boton" th:href="@{/notificaciones(usuarioId=${usuario.id})}">Ver sus notificaciones</a>
         <a class="boton gris" th:href="@{/usuarios/update/{id}(id=${usuario.id})}">Editar</a>
         <a class="boton gris" th:href="@{/usuarios}">Volver</a>
-    </p>
+    </div>
 </main>
 
 </body>

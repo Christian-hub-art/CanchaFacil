@@ -9,10 +9,48 @@
 
 <header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
 
-<main>
-    <h2>Panel general</h2>
-    <p>Reservas de espacios deportivos. Los datos se guardan en memoria mientras la aplicacion este encendida.</p>
+<section class="hero-portada">
+    <div class="interior">
+        <h1>Tu cancha, <span class="acento">tu momento.</span></h1>
+        <p>Reserva canchas de futbol facil, rapido y seguro. Administra usuarios, negocios y reservas desde un solo lugar.</p>
+    </div>
+</section>
 
+<main>
+    <div class="hero-claro">
+        <span class="hero-badge">Panel de gestion</span>
+        <h2>Tu cancha. Tu equipo.<br><span class="acento">Tu partido.</span></h2>
+        <p class="subtitulo">Encuentra espacios deportivos, consulta horarios disponibles y gestiona tu reserva de forma rapida y sencilla.</p>
+
+        <form class="buscador" th:action="@{/espacios}" method="get">
+            <div class="campo">
+                <label for="deporte">Tipo de cancha</label>
+                <input type="text" id="deporte" name="deporte" placeholder="Ej: futbol 5">
+            </div>
+            <div class="campo">
+                <label for="nombreCancha">Nombre</label>
+                <input type="text" id="nombreCancha" name="nombre" placeholder="Ej: Cancha El Bosque">
+            </div>
+            <button class="boton" type="submit">Buscar canchas</button>
+        </form>
+
+        <div class="estadisticas">
+            <div class="dato">
+                <div class="numero" th:text="${totalEspacios} + '+'">0+</div>
+                <div class="etiqueta">Canchas disponibles</div>
+            </div>
+            <div class="dato">
+                <div class="numero" th:text="${totalReservas}">0</div>
+                <div class="etiqueta">Reservas gestionadas</div>
+            </div>
+            <div class="dato">
+                <div class="numero" th:text="${totalUsuarios}">0</div>
+                <div class="etiqueta">Usuarios registrados</div>
+            </div>
+        </div>
+    </div>
+
+    <h2 style="font-size:1.15rem; margin-bottom:.25rem">Accesos rapidos</h2>
     <div class="tarjetas">
         <a class="tarjeta" th:href="@{/usuarios}">
             <span th:text="${totalUsuarios}">0</span> Usuarios
@@ -27,7 +65,7 @@
             <span th:text="${totalReservas}">0</span> Reservas
         </a>
     </div>
-    <div class="tarjetas">
+    <div class="tarjetas" style="margin-top:1rem">
         <a class="tarjeta" th:href="@{/pagos}">
             <span th:text="${totalPagos}">0</span> Pagos
         </a>
@@ -39,13 +77,15 @@
         </a>
     </div>
 
-    <h2 style="margin-top:2rem">Como empezar</h2>
-    <ol>
-        <li>Crear un <a th:href="@{/usuarios/add}">usuario</a> con rol ADMINISTRADOR.</li>
-        <li>Crear un <a th:href="@{/negocios/add}">negocio</a> y asignarle ese administrador.</li>
-        <li>Agregar <a th:href="@{/espacios/add}">espacios</a> al negocio.</li>
-        <li>Registrar <a th:href="@{/reservas/add}">reservas</a>, luego su pago y su calificacion.</li>
-    </ol>
+    <div class="panel-info" style="margin-top:2rem">
+        <h3>Como empezar</h3>
+        <ol style="margin:0; padding-left:1.2rem; color:var(--texto-suave)">
+            <li>Crear un <a th:href="@{/usuarios/add}">usuario</a> con rol ADMINISTRADOR.</li>
+            <li>Crear un <a th:href="@{/negocios/add}">negocio</a> y asignarle ese administrador.</li>
+            <li>Agregar <a th:href="@{/espacios/add}">espacios</a> al negocio.</li>
+            <li>Registrar <a th:href="@{/reservas/add}">reservas</a>, luego su pago y su calificacion.</li>
+        </ol>
+    </div>
 </main>
 
 </body>

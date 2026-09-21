@@ -1,0 +1,68 @@
+<header>
+  <div class="cabecera-interior">
+    <a class="marca" href="#">
+      <span class="isotipo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.5 8.5 12 2 5.5 8.5A6.9 6.9 0 0 0 4 13.5V18a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4.5a6.9 6.9 0 0 0-1.5-5Zm-6.5 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z"/></svg>
+      </span>
+      <span>CanchaFacil</span>
+    </a>
+
+    <nav>
+      <a class="activa" href="#">Inicio</a>
+      <a href="#">Reservas</a>
+      <a href="#">Negocios</a>
+      <a href="#">Pagos</a>
+    </nav>
+  </div>
+</header>
+
+<main class="contenedor-simple">
+  <h2>{{ titulo }}</h2>
+  <p class="subtitulo">Selecciona un deporte o busca por nombre para encontrar el espacio ideal.</p>
+
+  <a class="boton" href="#">Nuevo espacio</a>
+
+  <form class="filtro-form" action="#" method="get">
+    <label for="deporte">Filtrar por deporte</label>
+    <input id="deporte" name="deporte" type="text" placeholder="Ej: futbol" />
+    <button class="boton" type="submit">Buscar</button>
+  </form>
+
+  <div class="chips">
+    <span class="etiqueta-chips">Filtrar por:</span>
+    <a class="chip activo" href="#">Todas</a>
+    <a class="chip" href="#">Futbol 5</a>
+    <a class="chip" href="#">Futbol 8</a>
+    <a class="chip" href="#">Futbol 11</a>
+  </div>
+
+  <div class="grid-canchas">
+    @for (espacio of espacios; track espacio.id) {
+      <article class="tarjeta-cancha">
+        <div class="cubierta">
+          <span class="insignia disponible">{{ espacio.disponible ? 'Disponible' : 'Reservado' }}</span>
+          <span class="insignia deporte">{{ espacio.tipoDeporte }}</span>
+        </div>
+
+        <div class="cuerpo">
+          <h3>
+            <span>{{ espacio.nombre }}</span>
+            <span class="precio">${{ espacio.precioHora }}/h</span>
+          </h3>
+
+          <div class="ubicacion">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+            <span>{{ espacio.negocio }}</span>
+            <span>· capacidad {{ espacio.capacidad }}</span>
+          </div>
+
+          <div class="acciones">
+            <a class="boton" href="#">Ver</a>
+            <a class="boton gris" href="#">Editar</a>
+            <a class="boton rojo" href="#">Eliminar</a>
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+</main>

@@ -1,10 +1,12 @@
-import { Component } from '@angular/core';
-import { ReservasComponent } from './components/reservas/reservas.component';
+import { Component, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
+  imports: [RouterOutlet],
   selector: 'app-root',
-  imports: [ReservasComponent],
-  templateUrl: './app.component.html',
   styleUrl: './app.component.css',
+  templateUrl: './app.component.html',
 })
-export class App {}
+export class App {
+  protected readonly title = signal('frontend-angular');
+}

@@ -1,0 +1,40 @@
+<main class="contenedor-simple">
+	<header class="encabezado">
+		<div><p class="eyebrow">Administracion</p><h1>Usuarios</h1><p class="subtitulo">Consulta y gestiona las cuentas registradas.</p></div>
+		<button class="boton" type="button" (click)="nuevoUsuario()">Nuevo usuario</button>
+	</header>
+
+	<form class="busqueda" (submit)="$event.preventDefault()">
+		<label for="nombre">Buscar por nombre</label>
+		<div class="fila-busqueda"><input id="nombre" name="nombre" type="search" [(ngModel)]="nombreBusqueda" placeholder="Ej: Juan" /><button class="boton secundario" type="submit">Buscar</button></div>
+	</form>
+
+	<p class="vacio" *ngIf="usuariosFiltrados.length === 0">{{ nombreBusqueda ? 'No hay usuarios que coincidan con la busqueda.' : 'Todavia no hay usuarios registrados.' }}</p>
+	<div class="tabla-contenedor" *ngIf="usuariosFiltrados.length > 0">
+		<table>
+			<thead><tr><th>Id</th><th>Nombre</th><th>Email</th><th>Telefono</th><th>Rol</th><th>Acciones</th></tr></thead>
+			<tbody>
+				<tr *ngFor="let usuario of usuariosFiltrados">
+					<td>{{ usuario.id }}</td><td class="nombre-usuario">{{ usuario.nombre }}</td><td>{{ usuario.email }}</td><td>{{ usuario.telefono || '-' }}</td><td><span class="rol">{{ usuario.rol }}</span></td>
+					<td class="acciones"><button class="boton pequeno" type="button" (click)="verUsuario(usuario)">Ver</button><button class="boton pequeno secundario" type="button" (click)="editarUsuario(usuario)">Editar</button><button class="boton pequeno peligro" type="button" (click)="eliminarUsuario(usuario)">Eliminar</button></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<section class="panel" *ngIf="formularioVisible && usuarioSeleccionado">
+		<div class="panel-cabecera"><div><p class="eyebrow">{{ usuarioSeleccionado.id ? 'Edicion' : 'Nuevo registro' }}</p><h2>{{ usuarioSeleccionado.id ? 'Editar usuario' : 'Crear usuario' }}</h2></div><button class="cerrar" type="button" aria-label="Cerrar formulario" (click)="cancelarFormulario()">&#10005;</button></div>
+		<div class="error" *ngIf="error">{{ error }}</div>
+		<form class="formulario" (ngSubmit)="guardarUsuario()">
+			<label for="form-nombre">Nombre</label><input id="form-nombre" name="form-nombre" [(ngModel)]="usuarioSeleccionado.nombre" required />
+			<label for="form-email">Email</label><input id="form-email" name="form-email" type="email" [(ngModel)]="usuarioSeleccionado.email" required />
+			<label for="form-password">Contrasena</label><input id="form-password" name="form-password" type="password" [(ngModel)]="usuarioSeleccionado.password" [required]="!usuarioSeleccionado.id" />
+			<label for="form-telefono">Telefono</label><input id="form-telefono" name="form-telefono" [(ngModel)]="usuarioSeleccionado.telefono" />
+			<label for="form-direccion">Direccion</label><input id="form-direccion" name="form-direccion" [(ngModel)]="usuarioSeleccionado.direccion" required />
+			<label for="form-rol">Rol</label><select id="form-rol" name="form-rol" [(ngModel)]="usuarioSeleccionado.rol" required><option *ngFor="let rol of roles" [value]="rol">{{ rol }}</option></select>
+			<div class="acciones formulario-acciones"><button class="boton" type="submit">Guardar</button><button class="boton secundario" type="button" (click)="cancelarFormulario()">Cancelar</button></div>
+		</form>
+	</section>
+
+	<section class="detalle" *ngIf="usuarioEnDetalle"><div><p class="eyebrow">Detalle de usuario</p><h2>{{ usuarioEnDetalle.nombre }}</h2><p>{{ usuarioEnDetalle.email }} · {{ usuarioEnDetalle.rol }}</p></div><button class="cerrar" type="button" aria-label="Cerrar detalle" (click)="usuarioEnDetalle = null">&#10005;</button></section>
+</main>

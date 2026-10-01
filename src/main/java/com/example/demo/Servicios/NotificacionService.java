@@ -1,79 +1,24 @@
 package com.example.demo.Servicios;
 
-import com.example.demo.Entidades.Notificacion;
-import com.example.demo.Entidades.Usuario;
-import com.example.demo.Repositorios.NotificacionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 import java.util.List;
 
-@Service
-@Transactional(readOnly = true)
-public class NotificacionService {
+import com.example.demo.Entidades.Notificacion;
 
-    private final NotificacionRepository notificacionRepository;
-    private final UsuarioService usuarioService;
+public interface NotificacionService {
 
-    @Autowired
-    public NotificacionService(NotificacionRepository notificacionRepository, UsuarioService usuarioService) {
-        this.notificacionRepository = notificacionRepository;
-        this.usuarioService = usuarioService;
-    }
+    List<Notificacion> listar();
 
-    public List<Notificacion> listar() {
-        return notificacionRepository.findAll();
-    }
+    Notificacion buscarPorId(Long id);
 
-    public Notificacion buscarPorId(Long id) {
-        return notificacionRepository.findById(id).orElse(null);
-    }
+    Notificacion obtenerPorId(Long id);
 
-    public List<Notificacion> listarPorUsuario(Long usuarioId) {
-        return notificacionRepository.findByUsuarioId(usuarioId);
-    }
+    List<Notificacion> listarPorUsuario(Long usuarioId);
 
-    public List<Notificacion> listarNoLeidas(Long usuarioId) {
-        return notificacionRepository.findByUsuarioIdYNoLeidas(usuarioId);
-    }
+    List<Notificacion> listarNoLeidas(Long usuarioId);
 
-    /** Toda notificacion nace no leida y con la fecha del momento en que se crea. */
-    @Transactional
-    public Notificacion guardar(Notificacion notificacion, Long usuarioId) {
-        Usuario usuario = usuarioService.buscarPorId(usuarioId);
-        if (usuario == null) {
-            throw new IllegalArgumentException("El usuario con id " + usuarioId + " no existe");
-        }
+    Notificacion guardar(Notificacion notificacion, Long usuarioId);
 
-        Notificacion actual = notificacion.getId() == null ? null : buscarPorId(notificacion.getId());
-        if (actual == null) {
-            notificacion.setUsuario(usuario);
-            notificacion.setFecha(LocalDateTime.now());
-            notificacion.setLeido(false);
-            return notificacionRepository.save(notificacion);
-        }
+    Notificacion marcarComoLeida(Long id);
 
-        // Edicion: la fecha y el estado de lectura se conservan.
-        actual.setUsuario(usuario);
-        actual.setTipo(notificacion.getTipo());
-        actual.setMensaje(notificacion.getMensaje());
-        return notificacionRepository.save(actual);
-    }
-
-    @Transactional
-    public Notificacion marcarComoLeida(Long id) {
-        Notificacion notificacion = buscarPorId(id);
-        if (notificacion == null) {
-            throw new IllegalArgumentException("La notificacion con id " + id + " no existe");
-        }
-        notificacion.setLeido(true);
-        return notificacionRepository.save(notificacion);
-    }
-
-    @Transactional
-    public void eliminar(Long id) {
-        notificacionRepository.deleteById(id);
-    }
+    void eliminar(Long id);
 }

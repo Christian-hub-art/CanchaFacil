@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -46,15 +47,18 @@ public class Reserva {
     private Espacio espacio;
 
     // Convierte el valor de <input type="date"> (2026-08-24) a LocalDate
+    @NotNull(message = "La fecha es obligatoria")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     @Column(nullable = false)
     private LocalDate fecha;
 
     // Convierte el valor de <input type="time"> (18:00) a LocalTime
+    @NotNull(message = "La hora de inicio es obligatoria")
     @DateTimeFormat(iso = DateTimeFormat.ISO.TIME)
     @Column(name = "hora_inicio", nullable = false)
     private LocalTime horaInicio;
 
+    @NotNull(message = "La hora de fin es obligatoria")
     @DateTimeFormat(iso = DateTimeFormat.ISO.TIME)
     @Column(name = "hora_fin", nullable = false)
     private LocalTime horaFin;

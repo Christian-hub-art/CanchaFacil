@@ -10,6 +10,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -37,9 +42,14 @@ public class Pago {
     @JoinColumn(name = "reserva_id", nullable = false, unique = true)
     private Reserva reserva;
 
+    @NotNull(message = "El monto es obligatorio")
+    @DecimalMin(value = "0.0", message = "El monto no puede ser negativo")
+    @Digits(integer = 8, fraction = 2, message = "El monto admite hasta 8 enteros y 2 decimales")
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal monto;
 
+    @NotBlank(message = "El metodo de pago es obligatorio")
+    @Size(max = 40, message = "El metodo de pago no puede superar 40 caracteres")
     @Column(name = "metodo_pago", length = 40)
     private String metodoPago;
 
@@ -49,6 +59,7 @@ public class Pago {
     @Column(name = "fecha_pago")
     private LocalDateTime fechaPago;
 
+    @Size(max = 100, message = "La referencia no puede superar 100 caracteres")
     @Column(length = 100)
     private String referencia;
 }

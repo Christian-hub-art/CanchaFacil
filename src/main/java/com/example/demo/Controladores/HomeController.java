@@ -12,8 +12,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import com.example.demo.Entidades.Calificacion;
+import com.example.demo.Entidades.Espacio;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 /**
- * Pagina de inicio con el resumen de la aplicacion.
+ * Portada publica: buscador, cifras generales y canchas destacadas con su
+ * calificacion promedio.
  */
 @Controller
 public class HomeController {
@@ -52,6 +61,24 @@ public class HomeController {
         model.addAttribute("totalPagos", pagoService.listar().size());
         model.addAttribute("totalCalificaciones", calificacionService.listar().size());
         model.addAttribute("totalNotificaciones", notificacionService.listar().size());
+
+        // Canchas destacadas (las primeras 6) con su promedio de calificacion.
+        List<Espacio> espacios = espacioService.listar();
+        List<Espacio> destacados = espacios.stream().limit(6).toList();
+        Map<Long, Double> promedios = new HashMap<>();
+        for (Espacio e : destacados) {
+            promedios.put(e.getId(), calificacionService.promedioPorEspacio(e.getId()));
+        }
+        double promedioGeneral = calificacionService.listar().stream()
+                .map(Calificacion::getPuntuacion)
+                .filter(Objects::nonNull)
+                .mapToInt(Integer::intValue)
+                .average()
+                .orElse(0.0);
+
+        model.addAttribute("destacados", destacados);
+        model.addAttribute("promedios", promedios);
+        model.addAttribute("promedioGeneral", promedioGeneral);
         return "index";
     }
 }

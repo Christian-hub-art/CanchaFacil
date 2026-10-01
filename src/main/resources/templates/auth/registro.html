@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: head('Crear cuenta')}"></head>
+<body>
+
+<header th:replace="~{fragmentos/layout :: nav-publica('')}"></header>
+
+<div class="auth-split">
+    <section class="auth-visual">
+        <div class="contenido">
+            <h1>Arma tu equipo, <span class="acento">reserva en minutos.</span></h1>
+            <p>Crea tu cuenta gratis y empieza a reservar las mejores canchas de tu ciudad.</p>
+        </div>
+    </section>
+
+    <section class="auth-panel">
+        <div class="auth-tarjeta">
+            <h2>Crear cuenta</h2>
+            <p class="subtitulo">Regístrate como jugador para reservar canchas.</p>
+
+            <!-- novalidate: se deja que el servidor valide (@Valid) y muestre los errores -->
+            <form th:action="@{/registro}" th:object="${registro}" method="post" novalidate>
+
+                <!-- Errores globales: email repetido, etc. -->
+                <div class="alerta alerta-error" th:if="${#fields.hasGlobalErrors()}">
+                    <th:block th:replace="~{fragmentos/iconos :: icono('alerta')}"></th:block>
+                    <div><div th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error</div></div>
+                </div>
+
+                <div class="campo-form">
+                    <label for="nombre">Nombre completo</label>
+                    <div class="control-icono">
+                        <th:block th:replace="~{fragmentos/iconos :: icono('usuario')}"></th:block>
+                        <input class="control" type="text" id="nombre" th:field="*{nombre}"
+                               th:errorclass="campo-invalido" placeholder="David Morales" autocomplete="name">
+                    </div>
+                    <span class="error-campo" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+                </div>
+
+                <div class="campo-form">
+                    <label for="email">Correo electrónico</label>
+                    <div class="control-icono">
+                        <th:block th:replace="~{fragmentos/iconos :: icono('correo')}"></th:block>
+                        <input class="control" type="email" id="email" th:field="*{email}"
+                               th:errorclass="campo-invalido" placeholder="tu@correo.com" autocomplete="email">
+                    </div>
+                    <span class="error-campo" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                </div>
+
+                <div class="form-grid">
+                    <div class="campo-form">
+                        <label for="telefono">Teléfono</label>
+                        <div class="control-icono">
+                            <th:block th:replace="~{fragmentos/iconos :: icono('telefono')}"></th:block>
+                            <input class="control" type="text" id="telefono" th:field="*{telefono}"
+                                   th:errorclass="campo-invalido" placeholder="3001234567" autocomplete="tel">
+                        </div>
+                        <span class="error-campo" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></span>
+                    </div>
+                    <div class="campo-form">
+                        <label for="direccion">Dirección</label>
+                        <div class="control-icono">
+                            <th:block th:replace="~{fragmentos/iconos :: icono('ubicacion')}"></th:block>
+                            <input class="control" type="text" id="direccion" th:field="*{direccion}"
+                                   th:errorclass="campo-invalido" placeholder="Calle 10 # 20-30" autocomplete="street-address">
+                        </div>
+                        <span class="error-campo" th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></span>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="campo-form">
+                        <label for="password">Contraseña</label>
+                        <div class="control-icono">
+                            <th:block th:replace="~{fragmentos/iconos :: icono('llave')}"></th:block>
+                            <input class="control con-ojo" type="password" id="password" th:field="*{password}"
+                                   th:errorclass="campo-invalido" autocomplete="new-password">
+                            <button type="button" class="ver-clave" data-objetivo="password" aria-label="Mostrar contraseña">
+                                <th:block th:replace="~{fragmentos/iconos :: icono('ojo')}"></th:block>
+                            </button>
+                        </div>
+                        <span class="ayuda" th:unless="${#fields.hasErrors('password')}">Mínimo 6 caracteres.</span>
+                        <span class="error-campo" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+                    </div>
+                    <div class="campo-form">
+                        <label for="confirmarPassword">Confirmar contraseña</label>
+                        <div class="control-icono">
+                            <th:block th:replace="~{fragmentos/iconos :: icono('llave')}"></th:block>
+                            <input class="control" type="password" id="confirmarPassword" th:field="*{confirmarPassword}"
+                                   th:errorclass="campo-invalido" autocomplete="new-password">
+                        </div>
+                        <span class="error-campo" th:if="${#fields.hasErrors('confirmarPassword')}" th:errors="*{confirmarPassword}"></span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primario btn-lg btn-bloque" type="submit" style="margin-top:.4rem">Crear cuenta</button>
+            </form>
+
+            <p class="auth-pie">¿Ya tienes cuenta? <a th:href="@{/login}">Inicia sesión</a></p>
+        </div>
+    </section>
+</div>
+
+<!-- Muestra / oculta la contrasena al pulsar el icono del ojo -->
+<script th:fragment="script-clave">
+    document.querySelectorAll('.ver-clave').forEach(function (boton) {
+        boton.addEventListener('click', function () {
+            var campo = document.getElementById(boton.dataset.objetivo);
+            var oculto = campo.type === 'password';
+            campo.type = oculto ? 'text' : 'password';
+            boton.setAttribute('aria-label', oculto ? 'Ocultar contraseña' : 'Mostrar contraseña');
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: head('Error')}"></head>
+<body style="display:flex; flex-direction:column; min-height:100vh">
+
+<header th:replace="~{fragmentos/layout :: nav-publica('')}"></header>
+
+<!--
+  Pagina de error unica. La usan:
+  - ManejadorGlobalExcepciones (excepciones de los controladores), y
+  - Spring Boot para errores fuera de los controladores (404 de rutas que no
+    existen, 403 de acceso denegado...). Ambos mandan status, error y message.
+-->
+<main style="flex:1">
+    <div class="error-pagina">
+        <div class="codigo" th:text="${status}">404</div>
+
+        <h1 th:switch="${status}">
+            <span th:case="403">No tienes permiso para ver esta página</span>
+            <span th:case="404" th:text="${error == 'Not Found'} ? 'Página no encontrada' : ${error}">Página no encontrada</span>
+            <span th:case="500" th:text="${error == 'Internal Server Error'} ? 'Algo salió mal' : ${error}">Algo salió mal</span>
+            <span th:case="*" th:text="${error}">Error</span>
+        </h1>
+
+        <p th:if="${status == 403}">Esta sección es solo para administradores.</p>
+        <p th:if="${message != null and !#strings.isEmpty(message) and status != 403}" th:text="${message}">Detalle</p>
+        <p th:if="${status == 404 and (message == null or #strings.isEmpty(message))}">La dirección que buscas no existe o fue eliminada.</p>
+
+        <div class="acciones">
+            <a class="btn btn-neutro" href="javascript:history.back()">Volver</a>
+            <a class="btn btn-primario" th:href="${@sesion.autenticado} ? @{/perfil} : @{/}">Ir al inicio</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragmentos/layout :: footer-publico}"></footer>
+</body>
+</html>

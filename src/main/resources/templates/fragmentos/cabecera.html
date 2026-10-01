@@ -1,31 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-
-<!-- Fragmento reutilizable: se inserta en todas las paginas con th:replace -->
-<header th:fragment="cabecera">
-    <div class="cabecera-interior">
-        <a class="marca" th:href="@{/}">
-            <span class="isotipo">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                </svg>
-            </span>
-            <span>CanchaFacil</span>
-        </a>
-        <nav>
-            <a th:href="@{/}">Inicio</a>
-            <a th:href="@{/espacios}">Canchas</a>
-            <a th:href="@{/reservas}">Reservas</a>
-            <a th:href="@{/usuarios}">Usuarios</a>
-            <a th:href="@{/negocios}">Negocios</a>
-            <a th:href="@{/pagos}">Pagos</a>
-            <a th:href="@{/calificaciones}">Calificaciones</a>
-            <a th:href="@{/notificaciones}">Notificaciones</a>
-        </nav>
-    </div>
-</header>
-
+<!--
+  Fragmento antiguo. Se conserva por compatibilidad: ahora solo delega en la
+  barra publica del nuevo diseno (fragmentos/layout.html).
+-->
+<header th:fragment="cabecera" th:replace="~{fragmentos/layout :: nav-publica('')}"></header>
 </body>
 </html>

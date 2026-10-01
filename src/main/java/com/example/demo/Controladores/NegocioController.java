@@ -1,17 +1,22 @@
 package com.example.demo.Controladores;
 
-import com.example.demo.Entidades.Negocio;
-import com.example.demo.Servicios.NegocioService;
-import com.example.demo.Servicios.UsuarioService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.example.demo.Entidades.Negocio;
+import com.example.demo.Servicios.ReglaNegocioException;
+import com.example.demo.Servicios.NegocioService;
+import com.example.demo.Servicios.UsuarioService;
+
+import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/negocios")
@@ -20,7 +25,6 @@ public class NegocioController {
     private final NegocioService negocioService;
     private final UsuarioService usuarioService;
 
-    @Autowired
     public NegocioController(NegocioService negocioService, UsuarioService usuarioService) {
         this.negocioService = negocioService;
         this.usuarioService = usuarioService;
@@ -43,51 +47,59 @@ public class NegocioController {
     @GetMapping("/add")
     public String mostrarFormularioCrear(Model model) {
         model.addAttribute("negocio", new Negocio());
-        model.addAttribute("usuarios", usuarioService.listar());
-        model.addAttribute("accion", "Crear negocio");
+        prepararFormulario(model, "Crear negocio");
         return "negocios/formulario";
     }
 
     @GetMapping("/update/{id}")
     public String mostrarFormularioEditar(@PathVariable("id") Long id, Model model) {
-        Negocio negocio = negocioService.buscarPorId(id);
-        if (negocio == null) {
-            return "redirect:/negocios";
-        }
-        model.addAttribute("negocio", negocio);
-        model.addAttribute("usuarios", usuarioService.listar());
-        model.addAttribute("accion", "Editar negocio");
+        model.addAttribute("negocio", negocioService.obtenerPorId(id));
+        prepararFormulario(model, "Editar negocio");
         return "negocios/formulario";
     }
 
     @PostMapping("/add")
-    public String guardar(@ModelAttribute("negocio") Negocio negocio,
-                          @RequestParam("administradorId") Long administradorId,
-                          Model model) {
-        try {
-            negocioService.guardar(negocio, administradorId);
-        } catch (IllegalArgumentException ex) {
-            model.addAttribute("error", ex.getMessage());
-            model.addAttribute("usuarios", usuarioService.listar());
-            model.addAttribute("accion", "Crear negocio");
+    public String guardar(@Valid @ModelAttribute("negocio") Negocio negocio,
+                          BindingResult result,
+                          @RequestParam(value = "administradorId", required = false) Long administradorId,
+                          Model model,
+                          RedirectAttributes redirect) {
+        String accion = negocio.getId() == null ? "Crear negocio" : "Editar negocio";
+        if (administradorId == null) {
+            result.reject("administrador", "Debe seleccionar un administrador");
+        }
+        // Se vuelve a colgar el administrador elegido para que el <select> lo conserve.
+        negocio.setAdministrador(administradorId == null ? null : usuarioService.buscarPorId(administradorId));
+        if (result.hasErrors()) {
+            prepararFormulario(model, accion);
             return "negocios/formulario";
         }
+        try {
+            negocioService.guardar(negocio, administradorId);
+        } catch (ReglaNegocioException ex) {
+            model.addAttribute("error", ex.getMessage());
+            prepararFormulario(model, accion);
+            return "negocios/formulario";
+        }
+        redirect.addFlashAttribute("exito", "Negocio guardado correctamente");
         return "redirect:/negocios";
     }
 
     @GetMapping("/delete/{id}")
-    public String eliminar(@PathVariable("id") Long id) {
+    public String eliminar(@PathVariable("id") Long id, RedirectAttributes redirect) {
         negocioService.eliminar(id);
+        redirect.addFlashAttribute("exito", "Negocio eliminado");
         return "redirect:/negocios";
     }
 
     @GetMapping("/{id}")
     public String detalle(@PathVariable("id") Long id, Model model) {
-        Negocio negocio = negocioService.buscarPorId(id);
-        if (negocio == null) {
-            return "redirect:/negocios";
-        }
-        model.addAttribute("negocio", negocio);
+        model.addAttribute("negocio", negocioService.obtenerPorId(id));
         return "negocios/detalle";
+    }
+
+    private void prepararFormulario(Model model, String accion) {
+        model.addAttribute("usuarios", usuarioService.listar());
+        model.addAttribute("accion", accion);
     }
 }

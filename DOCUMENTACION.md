@@ -663,3 +663,179 @@ Gracias a las interfaces, el cambio es acotado. En resumen:
 | Controladores | 8 controladores |
 | Vistas | `index.html`, `fragmentos/cabecera.html` + 21 plantillas (7 entidades × 3) |
 | Estilos | `static/css/estilos.css` |
+
+---
+
+## 13. Actualización: requisitos de la rúbrica (login, validación, excepciones, consultas)
+
+Esta sección describe lo que se agregó para cumplir los 10 requisitos de la entrega.
+No se tocó `UsuarioRestController` ni la carpeta `frontend-angular`.
+
+### 13.1 Cómo se cubre cada requisito
+
+| # | Requisito | Dónde se evidencia |
+|---|---|---|
+| 1 | Proyecto Spring Boot funcionando con Thymeleaf | Todas las páginas en `templates/`, menú en `fragmentos/cabecera.html` |
+| 2 | Arquitectura en capas | `Controladores/` → `Servicios/` (contratos e implementaciones) → `Repositorios/` → `Entidades/` |
+| 3 | Modelo con ≥3 entidades relacionadas | Usuario, Negocio, Espacio, Reserva, Pago, Calificacion, Notificacion (`@ManyToOne`, `@OneToMany`, `@OneToOne`) |
+| 4 | CRUD de una entidad principal | Reservas (y las demás): listar `/reservas`, crear `/reservas/add`, consultar `/reservas/{id}`, editar `/reservas/update/{id}` |
+| 5 | Relación usada realmente | Reserva usa Usuario y Espacio al guardarse; `/reservas/mis-reservas` consulta las reservas del usuario en sesión; Calificacion hereda usuario y espacio de la Reserva; Pago aprobado confirma la Reserva |
+| 6 | Repositorios con `JpaRepository` | Los 7 repositorios extienden `JpaRepository` y los servicios usan `save()`, `findAll()`, `findById()` |
+| 7 | Consulta personalizada | `@Query` JPQL en `ReservaRepository`, `EspacioRepository`, `CalificacionRepository`, `PagoRepository`, `NotificacionRepository` + consultas derivadas. Se ven en `/consultas` |
+| 8 | Validación básica | Bean Validation (`@NotBlank`, `@Email`, `@Size`, `@Min`, `@Max`, `@DecimalMin`, `@Pattern`...) en entidades y `RegistroDTO`; `@Valid` + `BindingResult` en los controladores; errores bajo cada campo |
+| 9 | Manejo de errores | `Servicios/` contiene `RecursoNoEncontradoException` y `ReglaNegocioException`; `Controladores/` contiene `ManejadorGlobalExcepciones` (`@ControllerAdvice`) + plantilla `error.html` |
+| 10 | Datos iniciales | `Servicios/DatosIniciales.java` (`CommandLineRunner`) |
+
+### 13.2 Capa de servicios: interfaz + implementación
+
+Antes cada servicio era una clase. Ahora:
+
+```
+Servicios/
+├── UsuarioService.java          ← interfaz (contrato)
+├── UsuarioServiceImpl.java      ← @Service con la lógica
+├── DatosIniciales.java          ← carga inicial
+└── ...                          ← servicios de autenticación y excepciones
+```
+
+Las interfaces y sus implementaciones comparten el paquete `Servicios`; los controladores
+siguen dependiendo de las interfaces (`UsuarioService`, `ReservaService`, etc.).
+
+Cada servicio tiene ahora dos formas de buscar por id:
+
+- `buscarPorId(id)` → devuelve `null` si no existe (se conserva para el API REST).
+- `obtenerPorId(id)` → lanza `RecursoNoEncontradoException` (la usan las páginas: muestra un 404).
+
+### 13.3 Login y registro (Spring Security)
+
+- `Controladores/SeguridadConfig.java`: reglas de acceso, formulario de login, logout y BCrypt.
+- `Servicios/UsuarioDetallesService.java`: busca el usuario por email para el login.
+- `Servicios/SesionActual.java`: bean `sesion` para saber quién inició sesión
+  (en Thymeleaf: `${@sesion.autenticado}`, `${@sesion.admin}`, `${@sesion.nombre}`).
+- `Controladores/AuthController.java` + `templates/auth/login.html` y `auth/registro.html`.
+- `Servicios/RegistroDTO.java`: datos del formulario de registro (incluye "confirmar contraseña").
+
+Reglas de acceso:
+
+| Ruta | Quién entra |
+|---|---|
+| `/login`, `/registro`, `/css/**`, `/error` | Todos |
+| `/api/**` | Todos (sin CSRF) — para no romper Angular por ahora |
+| `/usuarios/**` | Solo `ADMINISTRADOR` |
+| Todo lo demás | Cualquier usuario con sesión |
+
+Quien se registra entra siempre como `CLIENTE`. Las contraseñas se guardan cifradas con BCrypt;
+al editar un usuario, si la contraseña se deja vacía se conserva la actual.
+
+Si la base ya tenía usuarios con la contraseña en texto plano, al arrancar `DatosIniciales`
+las cifra, así que esos usuarios pueden entrar con la misma clave de antes.
+
+### 13.4 Validación
+
+- Anotaciones en las entidades y en `RegistroDTO`.
+- En cada `@PostMapping` se usa `@Valid @ModelAttribute ... BindingResult result`.
+  Si `result.hasErrors()` se vuelve a mostrar el formulario.
+- En las plantillas: `th:errors="*{campo}"` bajo cada campo, `th:errorclass` para pintar el
+  borde en rojo y `#fields.globalErrors()` para errores generales (ej. "Debe seleccionar un negocio").
+- Los formularios tienen `novalidate` para que se vea la validación del servidor.
+- `messages.properties` traduce los errores de conversión (letras en un número, fecha inválida).
+- Se desactivó la re-validación automática de Hibernate al guardar
+  (`jakarta.persistence.validation.mode=none`): la validación se hace en el controlador.
+
+### 13.5 Excepciones
+
+| Excepción | Cuándo | Resultado |
+|---|---|---|
+| `RecursoNoEncontradoException` | `/espacios/999`, editar o borrar un id que no existe | Página de error 404 |
+| `ReglaNegocioException` | Email repetido, horario cruzado, reserva ya calificada, fecha pasada… | En formularios: mensaje en rojo. Fuera de formularios: página 400 |
+| `MethodArgumentTypeMismatchException` | `/reservas/abc` | Página 400 |
+| `DataIntegrityViolationException` | Violación de llave foránea o campo único | Página 409 |
+| Cualquier otra | Error inesperado | Página 500 (detalle en el log) |
+
+`ManejadorGlobalExcepciones` solo aplica a los controladores Thymeleaf (`assignableTypes`),
+así que el API REST sigue respondiendo igual que antes.
+
+### 13.6 Consultas personalizadas (`@Query` / JPQL)
+
+| Repositorio | Método | Qué hace | Dónde se usa |
+|---|---|---|---|
+| `ReservaRepository` | `buscarCruces(...)` | Reservas activas del mismo espacio y día que se cruzan en horario | Regla "no se puede reservar un horario ocupado" |
+| `ReservaRepository` | `buscarPorEmailDeUsuario(email)` | Reservas del usuario en sesión (`join fetch`) | `/reservas/mis-reservas` |
+| `ReservaRepository` | `contarPorEstado()` | `group by` estado | `/consultas` |
+| `EspacioRepository` | `buscarPorRangoDePrecio(min, max)` | `between` sobre el precio | `/consultas` |
+| `CalificacionRepository` | `promedioPorEspacio(id)` | `avg()` de puntuación | Detalle del espacio |
+| `CalificacionRepository` | `rankingDeEspacios()` | `select new EspacioRankingDTO(...)` con `avg` y `count`; proyección en `Repositorios/` | `/consultas` |
+| `PagoRepository` | `ingresosPorNegocio()` | `sum()` de pagos aprobados; proyección en `Repositorios/` | `/consultas` |
+| `NotificacionRepository` | `findByUsuarioIdYNoLeidas(id)` | Notificaciones sin leer | `/notificaciones/no-leidas/{id}` |
+| `UsuarioRepository` | `existsByEmailIgnoreCase(email)` | Consulta derivada | Registro |
+
+### 13.7 Datos iniciales
+
+Al arrancar, si la base está vacía se cargan 3 usuarios, 2 negocios, 4 espacios, 5 reservas
+(pasadas y futuras, en distintos estados), 3 pagos aprobados, 2 calificaciones y 3 notificaciones.
+Siempre se asegura que exista el administrador.
+
+| Email | Contraseña | Rol |
+|---|---|---|
+| `admin@canchafacil.com` | `admin123` | ADMINISTRADOR |
+| `laura@correo.com` | `cliente123` | CLIENTE |
+| `carlos@correo.com` | `cliente123` | CLIENTE |
+
+### 13.8 Otros cambios
+
+- `Usuario.Direccion` se renombró a `direccion` (misma columna en la BD) para que coincida
+  con el formulario y los mensajes de validación. El JSON del API no cambia.
+- Mensajes de éxito ("Reserva guardada correctamente") con `RedirectAttributes`.
+- Nueva página `/consultas` y enlace "Mis reservas" en el menú.
+- `pom.xml`: se agregaron `spring-boot-starter-validation` y `spring-boot-starter-security`.
+
+### 13.9 Guion de demostración
+
+1. Abrir `http://localhost:8080` → redirige al login.
+2. Registrarse con datos inválidos (email mal escrito, contraseñas distintas) → errores bajo cada campo.
+3. Registrarse bien → login → entrar como cliente. "Usuarios" no aparece en el menú; `/usuarios` da 403.
+4. Crear una reserva que se cruce con otra existente → mensaje de regla de negocio.
+5. Ver "Mis reservas".
+6. Abrir `/reservas/9999` → página 404 personalizada.
+7. Entrar como `admin@canchafacil.com` → CRUD de usuarios, negocios y espacios.
+8. Abrir `/consultas` → ranking, reservas por estado, ingresos y búsqueda por rango de precio.
+
+---
+
+## 14. Rediseño de la interfaz
+
+Todas las vistas se rehicieron siguiendo el diseño de Figma (login dividido con estadio,
+panel con barra lateral y portada con buscador).
+
+### Estructura de plantillas
+
+| Archivo | Qué contiene |
+|---|---|
+| `fragmentos/layout.html` | `head(titulo)`, `topbar`, `sidebar(activo)`, `footer`, `alertas`, `nav-publica(activo)`, `footer-publico` |
+| `fragmentos/iconos.html` | Iconos SVG en línea: `icono('calendario')`, dibujo de cancha y `estrellas(n)` |
+| `static/css/estilos.css` | Sistema de diseño: colores, botones, insignias, tarjetas, tablas, formularios, responsive |
+
+Cada página de la app usa el mismo esqueleto:
+
+```html
+<head th:replace="~{fragmentos/layout :: head('Reservas')}"></head>
+<body class="app">
+<header th:replace="~{fragmentos/layout :: topbar}"></header>
+<div class="app-cuerpo">
+    <aside th:replace="~{fragmentos/layout :: sidebar('reservas')}"></aside>
+    <main class="app-main"> ... </main>
+</div>
+<footer th:replace="~{fragmentos/layout :: footer}"></footer>
+```
+
+### Cambios de comportamiento
+
+- La portada (`/`) ahora es pública y muestra las canchas reales con su calificación.
+- Nueva página **Mi perfil** (`/perfil`, `PerfilController`): datos del usuario, estadísticas
+  calculadas de sus reservas (reservas, canchas diferentes, horas jugadas, calificación promedio)
+  y próximas reservas. En `/perfil/editar` cada usuario edita su nombre, teléfono, dirección y
+  contraseña (el email y el rol no se pueden cambiar desde ahí).
+- Después de iniciar sesión se entra a `/perfil`.
+- La campana de la barra superior muestra las notificaciones sin leer (`SesionActual`).
+- Las canchas se muestran como tarjetas con precio y calificación.
+- Tipografías: Plus Jakarta Sans (títulos) e Inter (texto), desde Google Fonts.

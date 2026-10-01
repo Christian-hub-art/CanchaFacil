@@ -50,6 +50,18 @@
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
 
+		<!-- Bean Validation (Hibernate Validator): @NotBlank, @Email, @Size, @Valid... -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+
+		<!-- Spring Security: login, registro, contrasenas cifradas con BCrypt y roles -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
 		<!-- Lombok: genera getters, setters, toString, equals y constructores -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>

@@ -1,94 +1,36 @@
 package com.example.demo.Servicios;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import com.example.demo.Servicios.RegistroDTO;
 import com.example.demo.Entidades.Rol;
 import com.example.demo.Entidades.Usuario;
-import com.example.demo.Repositorios.UsuarioRepository;
 
 /**
- * Capa de servicio: aqui viven las reglas de negocio de los usuarios.
- * El controlador llama al servicio y el servicio llama al repositorio.
- *
- * @Transactional(readOnly = true) a nivel de clase: todas las consultas viajan en
- * una transaccion de solo lectura; los metodos que escriben lo sobreescriben con
- * su propio @Transactional.
+ * Contrato de la capa de servicio para usuarios.
+ * Los controladores dependen de esta interfaz; la logica vive en UsuarioServiceImpl.
  */
-@Service
-@Transactional(readOnly = true)
-public class UsuarioService {
+public interface UsuarioService {
 
-    private final UsuarioRepository usuarioRepository;
+    List<Usuario> listar();
 
-    // Inyeccion de dependencias por constructor: Spring entrega el repositorio.
-    @Autowired
-    public UsuarioService(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
-    }
+    /** Devuelve el usuario o null si no existe (lo usa el API REST). */
+    Usuario buscarPorId(Long id);
 
-    public List<Usuario> listar() {
-        return usuarioRepository.findAll();
-    }
+    /** Devuelve el usuario o lanza RecursoNoEncontradoException (pagina 404). */
+    Usuario obtenerPorId(Long id);
 
-    /**
-     * JpaRepository.findById devuelve Optional, que obliga a pensar en el caso
-     * "no existe". Aqui se traduce a null para no cambiar el contrato que ya
-     * usan los controladores.
-     */
-    public Usuario buscarPorId(Long id) {
-        return usuarioRepository.findById(id).orElse(null);
-    }
+    Usuario buscarPorEmail(String email);
 
-    public Usuario buscarPorEmail(String email) {
-        return usuarioRepository.findByEmailIgnoreCase(email);
-    }
+    List<Usuario> buscarPorNombre(String nombre);
 
-    public List<Usuario> buscarPorNombre(String nombre) {
-        return usuarioRepository.findByNombreContainingIgnoreCase(nombre);
-    }
+    List<Usuario> listarPorRol(Rol rol);
 
-    public List<Usuario> listarPorRol(Rol rol) {
-        return usuarioRepository.findByRol(rol);
-    }
+    /** Crea o edita un usuario desde el CRUD (lo usa el administrador). */
+    Usuario guardar(Usuario usuario);
 
-    /**
-     * Regla de negocio: el email no se puede repetir y la fecha de registro
-     * se asigna sola la primera vez que se guarda el usuario.
-     *
-     * En la edicion se copian los campos sobre la entidad que ya esta en la BD
-     * (la "gestionada" por JPA) en vez de guardar el objeto suelto del formulario.
-     * Asi se conservan la fecha de registro y las listas de negocios, reservas,
-     * calificaciones y notificaciones sin tocarlas.
-     */
-    @Transactional
-    public Usuario guardar(Usuario usuario) {
-        Usuario conEseEmail = usuarioRepository.findByEmailIgnoreCase(usuario.getEmail());
-        if (conEseEmail != null && !conEseEmail.getId().equals(usuario.getId())) {
-            throw new IllegalArgumentException("Ya existe un usuario con el email " + usuario.getEmail());
-        }
+    /** Registro publico: crea un usuario con rol CLIENTE y contrasena cifrada. */
+    Usuario registrar(RegistroDTO registro);
 
-        Usuario actual = usuario.getId() == null ? null : buscarPorId(usuario.getId());
-        if (actual == null) {
-            usuario.setFechaRegistro(LocalDateTime.now());
-            return usuarioRepository.save(usuario);
-        }
-
-        actual.setNombre(usuario.getNombre());
-        actual.setEmail(usuario.getEmail());
-        actual.setPassword(usuario.getPassword());
-        actual.setTelefono(usuario.getTelefono());
-        actual.setRol(usuario.getRol());
-        actual.setDireccion(usuario.getDireccion());
-        return usuarioRepository.save(actual);
-    }
-
-    @Transactional
-    public void eliminar(Long id) {
-        usuarioRepository.deleteById(id);
-    }
+    void eliminar(Long id);
 }

@@ -1,54 +1,83 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Reservas</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-</head>
-<body>
+<head th:replace="~{fragmentos/layout :: head(${titulo})}"></head>
+<body class="app">
 
-<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+<header th:replace="~{fragmentos/layout :: topbar}"></header>
 
-<main class="contenedor-simple">
-    <h2 th:text="${titulo}">Reservas</h2>
+<div class="app-cuerpo">
+    <aside th:replace="~{fragmentos/layout :: sidebar(${titulo == 'Mis reservas'} ? 'mis-reservas' : 'reservas')}"></aside>
 
-    <a class="boton" th:href="@{/reservas/add}">Nueva reserva</a>
+    <main class="app-main">
+        <div class="pagina-cabecera">
+            <div>
+                <h1 th:text="${titulo}">Reservas</h1>
+                <p>Consulta, filtra y administra las reservas de las canchas.</p>
+            </div>
+            <div class="acciones"><a class="btn btn-primario" th:href="@{/reservas/add}"><th:block th:replace="~{fragmentos/iconos :: icono('mas')}"></th:block> Nueva reserva</a></div>
+        </div>
 
-    <form th:action="@{/reservas}" method="get" style="margin-top:1rem">
-        <label for="estado">Filtrar por estado</label>
-        <select id="estado" name="estado">
-            <option value="PENDIENTE">PENDIENTE</option>
-            <option value="CONFIRMADA">CONFIRMADA</option>
-            <option value="CANCELADA">CANCELADA</option>
-            <option value="COMPLETADA">COMPLETADA</option>
-        </select>
-        <button class="boton" type="submit" style="margin-top:.6rem">Filtrar</button>
-    </form>
+        <th:block th:replace="~{fragmentos/layout :: alertas}"></th:block>
 
-    <p class="vacio" th:if="${#lists.isEmpty(reservas)}">No hay reservas para mostrar.</p>
+        <div class="tarjeta">
+            <div class="herramientas">
+                <div class="chips">
+                    <a class="chip" th:classappend="${param.estado == null} ? 'activo'" th:href="@{/reservas}">Todas</a>
+                    <a class="chip" th:each="e : ${ {'PENDIENTE','CONFIRMADA','COMPLETADA','CANCELADA'} }"
+                       th:classappend="${param.estado != null and param.estado[0] == e} ? 'activo'"
+                       th:href="@{/reservas(estado=${e})}" th:text="${#strings.capitalize(#strings.toLowerCase(e))}">Pendiente</a>
+                </div>
+                <a class="btn btn-neutro btn-sm" th:href="@{/reservas/mis-reservas}"><th:block th:replace="~{fragmentos/iconos :: icono('usuario')}"></th:block> Solo las mías</a>
+            </div>
 
-    <table th:unless="${#lists.isEmpty(reservas)}">
-        <thead>
-        <tr><th>Id</th><th>Usuario</th><th>Espacio</th><th>Fecha</th><th>Horario</th><th>Estado</th><th>Acciones</th></tr>
-        </thead>
-        <tbody>
-        <tr th:each="reserva : ${reservas}">
-            <td th:text="${reserva.id}">1</td>
-            <td th:text="${reserva.usuario != null} ? ${reserva.usuario.nombre} : '-'">Juan</td>
-            <td th:text="${reserva.espacio != null} ? ${reserva.espacio.nombre} : '-'">Cancha 1</td>
-            <td th:text="${reserva.fecha}">2026-09-01</td>
-            <td th:text="${reserva.horaInicio} + ' - ' + ${reserva.horaFin}">18:00 - 19:00</td>
-            <td th:text="${reserva.estado}">PENDIENTE</td>
-            <td class="acciones">
-                <a class="boton" th:href="@{/reservas/{id}(id=${reserva.id})}">Ver</a>
-                <a class="boton gris" th:href="@{/reservas/update/{id}(id=${reserva.id})}">Editar</a>
-                <a class="boton gris" th:href="@{/reservas/cancelar/{id}(id=${reserva.id})}">Cancelar</a>
-                <a class="boton rojo" th:href="@{/reservas/delete/{id}(id=${reserva.id})}">Eliminar</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-</main>
+            <div th:if="${#lists.isEmpty(reservas)}">
+            <div class="vacio">
+                <div class="icono-vacio"><th:block th:replace="~{fragmentos/iconos :: icono('calendario')}"></th:block></div>
+                <strong>No hay reservas para mostrar</strong>
+                <p>Cuando se registren reservas aparecerán en esta lista.</p>
+                <a class="btn btn-primario" th:href="@{/reservas/add}"><th:block th:replace="~{fragmentos/iconos :: icono('mas')}"></th:block> Nueva reserva</a>
+            </div>
+            </div>
+
+            <div class="tabla-envoltura" th:unless="${#lists.isEmpty(reservas)}">
+                <table class="tabla">
+                    <thead>
+                    <tr><th>#</th><th>Jugador</th><th>Cancha</th><th>Fecha</th><th>Horario</th><th>Estado</th><th>Acciones</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="r : ${reservas}">
+                        <td class="id" th:text="${r.id}">1</td>
+                        <td>
+                            <div class="celda-persona" th:if="${r.usuario != null}">
+                                <span class="avatar" th:text="${#strings.substring(r.usuario.nombre, 0, 1)}">L</span>
+                                <span class="principal" th:text="${r.usuario.nombre}">Laura</span>
+                            </div>
+                        </td>
+                        <td><span class="principal" th:text="${r.espacio != null} ? ${r.espacio.nombre} : '-'">Cancha 1</span>
+                            <span class="secundario" th:if="${r.espacio != null}" th:text="${r.espacio.tipoDeporte}">futbol 5</span></td>
+                        <td th:text="${#temporals.format(r.fecha, 'dd MMM yyyy')}">01 oct 2026</td>
+                        <td class="num" th:text="${r.horaInicio} + ' – ' + ${r.horaFin}">18:00 – 19:00</td>
+                        <td><span class="insignia insignia-punto" th:classappend="'estado-' + ${r.estado}" th:text="${r.estado}">PENDIENTE</span></td>
+                        <td>
+                            <div class="acciones-fila">
+                                <a class="btn btn-neutro btn-sm" th:href="@{/reservas/{id}(id=${r.id})}">Ver</a>
+                                <a class="btn btn-neutro btn-sm" th:href="@{/reservas/update/{id}(id=${r.id})}" title="Editar"><th:block th:replace="~{fragmentos/iconos :: icono('editar')}"></th:block></a>
+                                <a class="btn btn-neutro btn-sm" th:if="${r.estado != 'CANCELADA' and r.estado != 'COMPLETADA'}"
+                                   th:href="@{/reservas/cancelar/{id}(id=${r.id})}"
+                                   onclick="return confirm('¿Cancelar esta reserva?')" title="Cancelar"><th:block th:replace="~{fragmentos/iconos :: icono('x')}"></th:block></a>
+                                <a class="btn btn-peligro btn-sm" th:href="@{/reservas/delete/{id}(id=${r.id})}"
+                                   onclick="return confirm('¿Eliminar esta reserva? También se borran su pago y su calificación.')" title="Eliminar"><th:block th:replace="~{fragmentos/iconos :: icono('basura')}"></th:block></a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer th:replace="~{fragmentos/layout :: footer}"></footer>
 
 </body>
 </html>

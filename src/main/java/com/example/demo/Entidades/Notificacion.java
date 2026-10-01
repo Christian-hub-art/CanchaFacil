@@ -10,6 +10,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,9 +37,13 @@ public class Notificacion {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
+    @NotBlank(message = "El tipo es obligatorio")
+    @Size(max = 60, message = "El tipo no puede superar 60 caracteres")
     @Column(length = 60)
     private String tipo;
 
+    @NotBlank(message = "El mensaje es obligatorio")
+    @Size(max = 500, message = "El mensaje no puede superar 500 caracteres")
     @Column(nullable = false, length = 500)
     private String mensaje;
 

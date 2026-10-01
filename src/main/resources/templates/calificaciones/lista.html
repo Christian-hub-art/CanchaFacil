@@ -1,41 +1,65 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Calificaciones</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-</head>
-<body>
+<head th:replace="~{fragmentos/layout :: head(${titulo})}"></head>
+<body class="app">
 
-<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+<header th:replace="~{fragmentos/layout :: topbar}"></header>
 
-<main class="contenedor-simple">
-    <h2 th:text="${titulo}">Calificaciones</h2>
+<div class="app-cuerpo">
+    <aside th:replace="~{fragmentos/layout :: sidebar('calificaciones')}"></aside>
 
-    <a class="boton" th:href="@{/calificaciones/add}">Nueva calificacion</a>
+    <main class="app-main">
+        <div class="pagina-cabecera">
+            <div>
+                <h1 th:text="${titulo}">Calificaciones</h1>
+                <p>Opiniones de los jugadores sobre las canchas.</p>
+            </div>
+            <div class="acciones"><a class="btn btn-primario" th:href="@{/calificaciones/add}"><th:block th:replace="~{fragmentos/iconos :: icono('mas')}"></th:block> Nueva calificación</a></div>
+        </div>
 
-    <p class="vacio" th:if="${#lists.isEmpty(calificaciones)}">No hay calificaciones para mostrar.</p>
+        <th:block th:replace="~{fragmentos/layout :: alertas}"></th:block>
 
-    <table th:unless="${#lists.isEmpty(calificaciones)}">
-        <thead>
-        <tr><th>Id</th><th>Usuario</th><th>Espacio</th><th>Puntuacion</th><th>Comentario</th><th>Acciones</th></tr>
-        </thead>
-        <tbody>
-        <tr th:each="calificacion : ${calificaciones}">
-            <td th:text="${calificacion.id}">1</td>
-            <td th:text="${calificacion.usuario != null} ? ${calificacion.usuario.nombre} : '-'">Juan</td>
-            <td th:text="${calificacion.espacio != null} ? ${calificacion.espacio.nombre} : '-'">Cancha 1</td>
-            <td th:text="${calificacion.puntuacion} + '/5'">5/5</td>
-            <td th:text="${calificacion.comentario}">Excelente</td>
-            <td class="acciones">
-                <a class="boton" th:href="@{/calificaciones/{id}(id=${calificacion.id})}">Ver</a>
-                <a class="boton gris" th:href="@{/calificaciones/update/{id}(id=${calificacion.id})}">Editar</a>
-                <a class="boton rojo" th:href="@{/calificaciones/delete/{id}(id=${calificacion.id})}">Eliminar</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-</main>
+        <div class="tarjeta">
+            <div th:if="${#lists.isEmpty(calificaciones)}">
+            <div class="vacio">
+                <div class="icono-vacio"><th:block th:replace="~{fragmentos/iconos :: icono('estrella')}"></th:block></div>
+                <strong>Todavía no hay calificaciones</strong>
+                <p>Después de jugar, califica la cancha desde tu reserva.</p>
+                <a class="btn btn-primario" th:href="@{/calificaciones/add}"><th:block th:replace="~{fragmentos/iconos :: icono('mas')}"></th:block> Nueva calificación</a>
+            </div>
+            </div>
+            <div class="tabla-envoltura" th:unless="${#lists.isEmpty(calificaciones)}">
+                <table class="tabla">
+                    <thead><tr><th>#</th><th>Jugador</th><th>Cancha</th><th>Puntuación</th><th>Comentario</th><th>Acciones</th></tr></thead>
+                    <tbody>
+                    <tr th:each="c : ${calificaciones}">
+                        <td class="id" th:text="${c.id}">1</td>
+                        <td>
+                            <div class="celda-persona" th:if="${c.usuario != null}">
+                                <span class="avatar" th:text="${#strings.substring(c.usuario.nombre, 0, 1)}">L</span>
+                                <span class="principal" th:text="${c.usuario.nombre}">Laura</span>
+                            </div>
+                        </td>
+                        <td><a th:if="${c.espacio != null}" th:href="@{/espacios/{id}(id=${c.espacio.id})}" th:text="${c.espacio.nombre}">Cancha</a></td>
+                        <td><span th:replace="~{fragmentos/iconos :: estrellas(${c.puntuacion})}"></span></td>
+                        <td><span class="texto-corto" style="display:block" th:text="${c.comentario}">Excelente</span></td>
+                        <td>
+                            <div class="acciones-fila">
+                                <a class="btn btn-neutro btn-sm" th:href="@{/calificaciones/{id}(id=${c.id})}">Ver</a>
+                                <a class="btn btn-neutro btn-sm" th:href="@{/calificaciones/update/{id}(id=${c.id})}" title="Editar"><th:block th:replace="~{fragmentos/iconos :: icono('editar')}"></th:block></a>
+                                <a class="btn btn-peligro btn-sm" th:href="@{/calificaciones/delete/{id}(id=${c.id})}"
+                                   onclick="return confirm('¿Eliminar esta calificación?')" title="Eliminar"><th:block th:replace="~{fragmentos/iconos :: icono('basura')}"></th:block></a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer th:replace="~{fragmentos/layout :: footer}"></footer>
 
 </body>
 </html>

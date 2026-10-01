@@ -1,54 +1,76 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Pagos</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-</head>
-<body>
+<head th:replace="~{fragmentos/layout :: head(${titulo})}"></head>
+<body class="app">
 
-<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+<header th:replace="~{fragmentos/layout :: topbar}"></header>
 
-<main class="contenedor-simple">
-    <h2 th:text="${titulo}">Pagos</h2>
+<div class="app-cuerpo">
+    <aside th:replace="~{fragmentos/layout :: sidebar('pagos')}"></aside>
 
-    <a class="boton" th:href="@{/pagos/add}">Registrar pago</a>
+    <main class="app-main">
+        <div class="pagina-cabecera">
+            <div>
+                <h1 th:text="${titulo}">Pagos</h1>
+                <p>Aprueba, rechaza o reembolsa los pagos de las reservas.</p>
+            </div>
+            <div class="acciones"><a class="btn btn-primario" th:href="@{/pagos/add}"><th:block th:replace="~{fragmentos/iconos :: icono('mas')}"></th:block> Registrar pago</a></div>
+        </div>
 
-    <form th:action="@{/pagos}" method="get" style="margin-top:1rem">
-        <label for="estado">Filtrar por estado</label>
-        <select id="estado" name="estado">
-            <option value="PENDIENTE">PENDIENTE</option>
-            <option value="APROBADO">APROBADO</option>
-            <option value="RECHAZADO">RECHAZADO</option>
-            <option value="REEMBOLSADO">REEMBOLSADO</option>
-        </select>
-        <button class="boton" type="submit" style="margin-top:.6rem">Filtrar</button>
-    </form>
+        <th:block th:replace="~{fragmentos/layout :: alertas}"></th:block>
 
-    <p class="vacio" th:if="${#lists.isEmpty(pagos)}">No hay pagos para mostrar.</p>
+        <div class="tarjeta">
+            <div class="herramientas">
+                <div class="chips">
+                    <a class="chip" th:classappend="${param.estado == null} ? 'activo'" th:href="@{/pagos}">Todos</a>
+                    <a class="chip" th:each="e : ${ {'PENDIENTE','APROBADO','RECHAZADO','REEMBOLSADO'} }"
+                       th:classappend="${param.estado != null and param.estado[0] == e} ? 'activo'"
+                       th:href="@{/pagos(estado=${e})}" th:text="${#strings.capitalize(#strings.toLowerCase(e))}">Aprobado</a>
+                </div>
+            </div>
 
-    <table th:unless="${#lists.isEmpty(pagos)}">
-        <thead>
-        <tr><th>Id</th><th>Reserva</th><th>Monto</th><th>Metodo</th><th>Estado</th><th>Referencia</th><th>Acciones</th></tr>
-        </thead>
-        <tbody>
-        <tr th:each="pago : ${pagos}">
-            <td th:text="${pago.id}">1</td>
-            <td th:text="${pago.reserva != null} ? ${pago.reserva.id} : '-'">1</td>
-            <td th:text="${pago.monto}">50000</td>
-            <td th:text="${pago.metodoPago}">Tarjeta</td>
-            <td th:text="${pago.estado}">PENDIENTE</td>
-            <td th:text="${pago.referencia}">REF-1</td>
-            <td class="acciones">
-                <a class="boton" th:href="@{/pagos/{id}(id=${pago.id})}">Ver</a>
-                <a class="boton" th:href="@{/pagos/estado/{id}(id=${pago.id}, valor='APROBADO')}">Aprobar</a>
-                <a class="boton gris" th:href="@{/pagos/estado/{id}(id=${pago.id}, valor='RECHAZADO')}">Rechazar</a>
-                <a class="boton rojo" th:href="@{/pagos/delete/{id}(id=${pago.id})}">Eliminar</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-</main>
+            <div th:if="${#lists.isEmpty(pagos)}">
+            <div class="vacio">
+                <div class="icono-vacio"><th:block th:replace="~{fragmentos/iconos :: icono('tarjeta')}"></th:block></div>
+                <strong>No hay pagos para mostrar</strong>
+                <p>Registra el pago de una reserva para verlo aquí.</p>
+                <a class="btn btn-primario" th:href="@{/pagos/add}"><th:block th:replace="~{fragmentos/iconos :: icono('mas')}"></th:block> Registrar pago</a>
+            </div>
+            </div>
+
+            <div class="tabla-envoltura" th:unless="${#lists.isEmpty(pagos)}">
+                <table class="tabla">
+                    <thead><tr><th>#</th><th>Reserva</th><th>Monto</th><th>Método</th><th>Referencia</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <tbody>
+                    <tr th:each="p : ${pagos}">
+                        <td class="id" th:text="${p.id}">1</td>
+                        <td th:if="${p.reserva != null}">
+                            <a class="principal" th:href="@{/reservas/{id}(id=${p.reserva.id})}" th:text="'Reserva #' + ${p.reserva.id}">Reserva #1</a>
+                            <span class="secundario" th:text="${p.reserva.espacio != null} ? ${p.reserva.espacio.nombre} : ''">Cancha</span>
+                        </td>
+                        <td th:unless="${p.reserva != null}">-</td>
+                        <td class="num" th:text="'$' + ${#numbers.formatDecimal(p.monto, 1, 'POINT', 0, 'COMMA')}">$80.000</td>
+                        <td th:text="${p.metodoPago}">Tarjeta</td>
+                        <td class="id" th:text="${p.referencia}">TRX-1</td>
+                        <td><span class="insignia insignia-punto" th:classappend="'estado-' + ${p.estado}" th:text="${p.estado}">PENDIENTE</span></td>
+                        <td>
+                            <div class="acciones-fila">
+                                <a class="btn btn-suave btn-sm" th:if="${p.estado == 'PENDIENTE'}" th:href="@{/pagos/estado/{id}(id=${p.id}, valor='APROBADO')}" title="Aprobar"><th:block th:replace="~{fragmentos/iconos :: icono('check')}"></th:block></a>
+                                <a class="btn btn-neutro btn-sm" th:if="${p.estado == 'PENDIENTE'}" th:href="@{/pagos/estado/{id}(id=${p.id}, valor='RECHAZADO')}" title="Rechazar"><th:block th:replace="~{fragmentos/iconos :: icono('x')}"></th:block></a>
+                                <a class="btn btn-neutro btn-sm" th:href="@{/pagos/{id}(id=${p.id})}">Ver</a>
+                                <a class="btn btn-peligro btn-sm" th:href="@{/pagos/delete/{id}(id=${p.id})}"
+                                   onclick="return confirm('¿Eliminar este pago?')" title="Eliminar"><th:block th:replace="~{fragmentos/iconos :: icono('basura')}"></th:block></a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer th:replace="~{fragmentos/layout :: footer}"></footer>
 
 </body>
 </html>

@@ -1,48 +1,60 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Notificaciones</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-</head>
-<body>
+<head th:replace="~{fragmentos/layout :: head(${titulo})}"></head>
+<body class="app">
 
-<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+<header th:replace="~{fragmentos/layout :: topbar}"></header>
 
-<main class="contenedor-simple">
-    <h2 th:text="${titulo}">Notificaciones</h2>
+<div class="app-cuerpo">
+    <aside th:replace="~{fragmentos/layout :: sidebar('notificaciones')}"></aside>
 
-    <a class="boton" th:href="@{/notificaciones/add}">Nueva notificacion</a>
+    <main class="app-main">
+        <div class="pagina-cabecera">
+            <div>
+                <h1 th:text="${titulo}">Notificaciones</h1>
+                <p>Avisos sobre reservas, pagos y novedades de la plataforma.</p>
+            </div>
+            <div class="acciones"><a class="btn btn-primario" th:if="${@sesion.admin}" th:href="@{/notificaciones/add}"><th:block th:replace="~{fragmentos/iconos :: icono('mas')}"></th:block> Nueva notificación</a></div>
+        </div>
 
-    <form th:action="@{/notificaciones}" method="get" style="margin-top:1rem">
-        <label for="usuarioId">Filtrar por id de usuario</label>
-        <input type="number" id="usuarioId" name="usuarioId" min="1">
-        <button class="boton" type="submit" style="margin-top:.6rem">Filtrar</button>
-    </form>
+        <th:block th:replace="~{fragmentos/layout :: alertas}"></th:block>
 
-    <p class="vacio" th:if="${#lists.isEmpty(notificaciones)}">No hay notificaciones para mostrar.</p>
+        <div class="tarjeta">
+            <div th:if="${#lists.isEmpty(notificaciones)}">
+            <div class="vacio">
+                <div class="icono-vacio"><th:block th:replace="~{fragmentos/iconos :: icono('campana')}"></th:block></div>
+                <strong>No hay notificaciones</strong>
+                <p>Aquí verás los avisos de tus reservas y pagos.</p>
+                
+            </div>
+            </div>
+            <div class="tabla-envoltura" th:unless="${#lists.isEmpty(notificaciones)}">
+                <table class="tabla">
+                    <thead><tr><th></th><th>Mensaje</th><th>Para</th><th>Tipo</th><th>Fecha</th><th>Acciones</th></tr></thead>
+                    <tbody>
+                    <tr th:each="n : ${notificaciones}">
+                        <td style="width:28px"><span class="punto" th:classappend="${n.leido} ? 'punto-leido' : 'punto-nuevo'" th:title="${n.leido} ? 'Leída' : 'Sin leer'"></span></td>
+                        <td><span class="texto-corto" style="display:block" th:classappend="${!n.leido} ? 'principal'" th:text="${n.mensaje}">Mensaje</span></td>
+                        <td th:text="${n.usuario != null} ? ${n.usuario.nombre} : '-'">Laura</td>
+                        <td><span class="insignia insignia-gris" th:text="${n.tipo}">RESERVA</span></td>
+                        <td class="id" th:text="${n.fecha != null} ? ${#temporals.format(n.fecha, 'dd MMM, HH:mm')} : '-'">01 oct</td>
+                        <td>
+                            <div class="acciones-fila">
+                                <a class="btn btn-suave btn-sm" th:unless="${n.leido}" th:href="@{/notificaciones/leer/{id}(id=${n.id})}" title="Marcar como leída"><th:block th:replace="~{fragmentos/iconos :: icono('check')}"></th:block></a>
+                                <a class="btn btn-neutro btn-sm" th:href="@{/notificaciones/{id}(id=${n.id})}">Ver</a>
+                                <a class="btn btn-peligro btn-sm" th:href="@{/notificaciones/delete/{id}(id=${n.id})}"
+                                   onclick="return confirm('¿Eliminar esta notificación?')" title="Eliminar"><th:block th:replace="~{fragmentos/iconos :: icono('basura')}"></th:block></a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
 
-    <table th:unless="${#lists.isEmpty(notificaciones)}">
-        <thead>
-        <tr><th>Id</th><th>Usuario</th><th>Tipo</th><th>Mensaje</th><th>Fecha</th><th>Leida</th><th>Acciones</th></tr>
-        </thead>
-        <tbody>
-        <tr th:each="notificacion : ${notificaciones}">
-            <td th:text="${notificacion.id}">1</td>
-            <td th:text="${notificacion.usuario != null} ? ${notificacion.usuario.nombre} : '-'">Juan</td>
-            <td th:text="${notificacion.tipo}">RESERVA</td>
-            <td th:text="${notificacion.mensaje}">Su reserva fue confirmada</td>
-            <td th:text="${notificacion.fecha}">2026-08-24</td>
-            <td th:text="${notificacion.leido} ? 'Si' : 'No'">No</td>
-            <td class="acciones">
-                <a class="boton" th:href="@{/notificaciones/{id}(id=${notificacion.id})}">Ver</a>
-                <a class="boton gris" th:href="@{/notificaciones/leer/{id}(id=${notificacion.id})}">Marcar leida</a>
-                <a class="boton rojo" th:href="@{/notificaciones/delete/{id}(id=${notificacion.id})}">Eliminar</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-</main>
+<footer th:replace="~{fragmentos/layout :: footer}"></footer>
 
 </body>
 </html>

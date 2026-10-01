@@ -23,6 +23,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     Usuario findByEmailIgnoreCase(String email);
 
+    /** Consulta derivada: la usa el registro para avisar que el email ya existe. */
+    boolean existsByEmailIgnoreCase(String email);
+
     List<Usuario> findByRol(Rol rol);
 
     /** Busqueda parcial: "jua" encuentra a "Juan" y a "Juana". */

@@ -1,92 +1,153 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>CanchaFacil</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-</head>
+<head th:replace="~{fragmentos/layout :: head('Inicio')}"></head>
 <body>
 
-<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+<header th:replace="~{fragmentos/layout :: nav-publica('inicio')}"></header>
 
-<section class="hero-portada">
+<!-- ===================== Hero ===================== -->
+<section class="hero">
     <div class="interior">
-        <h1>Tu cancha, <span class="acento">tu momento.</span></h1>
-        <p>Reserva canchas de futbol facil, rapido y seguro. Administra usuarios, negocios y reservas desde un solo lugar.</p>
-    </div>
-</section>
+        <div>
+            <span class="hero-etiqueta">Reserva tu cancha de fútbol</span>
+            <h1>Tu cancha.<br>Tu equipo.<br><span class="acento">Tu partido.</span></h1>
+            <p class="bajada">Encuentra canchas de fútbol cerca de ti, consulta horarios disponibles y reserva tu partido de forma rápida y sencilla.</p>
 
-<main>
-    <div class="hero-claro">
-        <span class="hero-badge">Panel de gestion</span>
-        <h2>Tu cancha. Tu equipo.<br><span class="acento">Tu partido.</span></h2>
-        <p class="subtitulo">Encuentra espacios deportivos, consulta horarios disponibles y gestiona tu reserva de forma rapida y sencilla.</p>
+            <!-- Busca por tipo de cancha: GET /espacios?deporte=... -->
+            <form class="buscador" th:action="@{/espacios}" method="get">
+                <div class="campo">
+                    <label for="deporte">Tipo de cancha</label>
+                    <select id="deporte" name="deporte">
+                        <option value="futbol 5">Fútbol 5</option>
+                        <option value="futbol 8">Fútbol 8</option>
+                        <option value="futbol 11">Fútbol 11</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label>Ubicación</label>
+                    <input type="text" value="Bogotá, Colombia" readonly>
+                </div>
+                <div class="campo">
+                    <label>Fecha</label>
+                    <input type="text" th:value="${#temporals.format(#temporals.createToday(), 'd MMMM yyyy')}" readonly>
+                </div>
+                <button class="btn btn-primario" type="submit">Buscar canchas</button>
+            </form>
 
-        <form class="buscador" th:action="@{/espacios}" method="get">
-            <div class="campo">
-                <label for="deporte">Tipo de cancha</label>
-                <input type="text" id="deporte" name="deporte" placeholder="Ej: futbol 5">
+            <div class="cifras">
+                <div>
+                    <div class="numero" th:text="${totalEspacios} + '+'">120+</div>
+                    <div class="etiqueta">Canchas disponibles</div>
+                </div>
+                <div>
+                    <div class="numero" th:text="${promedioGeneral > 0} ? ${#numbers.formatDecimal(promedioGeneral, 1, 1)} : '—'">4.8</div>
+                    <div class="etiqueta">Calificación promedio</div>
+                </div>
+                <div>
+                    <div class="numero">24/7</div>
+                    <div class="etiqueta">Reservas online</div>
+                </div>
             </div>
-            <div class="campo">
-                <label for="nombreCancha">Nombre</label>
-                <input type="text" id="nombreCancha" name="nombre" placeholder="Ej: Cancha El Bosque">
-            </div>
-            <button class="boton" type="submit">Buscar canchas</button>
-        </form>
+        </div>
 
-        <div class="estadisticas">
-            <div class="dato">
-                <div class="numero" th:text="${totalEspacios} + '+'">0+</div>
-                <div class="etiqueta">Canchas disponibles</div>
-            </div>
-            <div class="dato">
-                <div class="numero" th:text="${totalReservas}">0</div>
-                <div class="etiqueta">Reservas gestionadas</div>
-            </div>
-            <div class="dato">
-                <div class="numero" th:text="${totalUsuarios}">0</div>
-                <div class="etiqueta">Usuarios registrados</div>
+        <div class="cancha-grafica">
+            <svg th:replace="~{fragmentos/iconos :: cancha-grande}"></svg>
+            <div class="tarjeta-flotante">
+                <strong>Canchas cerca de ti</strong>
+                <span>Disponibilidad en tiempo real</span>
             </div>
         </div>
     </div>
+</section>
 
-    <h2 style="font-size:1.15rem; margin-bottom:.25rem">Accesos rapidos</h2>
-    <div class="tarjetas">
-        <a class="tarjeta" th:href="@{/usuarios}">
-            <span th:text="${totalUsuarios}">0</span> Usuarios
-        </a>
-        <a class="tarjeta" th:href="@{/negocios}">
-            <span th:text="${totalNegocios}">0</span> Negocios
-        </a>
-        <a class="tarjeta" th:href="@{/espacios}">
-            <span th:text="${totalEspacios}">0</span> Espacios
-        </a>
-        <a class="tarjeta" th:href="@{/reservas}">
-            <span th:text="${totalReservas}">0</span> Reservas
-        </a>
+<!-- ===================== Filtros ===================== -->
+<div class="barra-filtros">
+    <div class="interior">
+        <span class="titulo-filtro">Filtrar por:</span>
+        <a class="chip activo" th:href="@{/espacios}">Todas</a>
+        <a class="chip" th:href="@{/espacios(deporte='futbol 5')}">Fútbol 5</a>
+        <a class="chip" th:href="@{/espacios(deporte='futbol 8')}">Fútbol 8</a>
+        <a class="chip" th:href="@{/espacios(deporte='futbol 11')}">Fútbol 11</a>
     </div>
-    <div class="tarjetas" style="margin-top:1rem">
-        <a class="tarjeta" th:href="@{/pagos}">
-            <span th:text="${totalPagos}">0</span> Pagos
-        </a>
-        <a class="tarjeta" th:href="@{/calificaciones}">
-            <span th:text="${totalCalificaciones}">0</span> Calificaciones
-        </a>
-        <a class="tarjeta" th:href="@{/notificaciones}">
-            <span th:text="${totalNotificaciones}">0</span> Notificaciones
-        </a>
+</div>
+
+<!-- ===================== Canchas destacadas ===================== -->
+<section class="seccion">
+    <div class="seccion-cabecera">
+        <div>
+            <h2>Canchas cerca de ti</h2>
+            <p>Seleccionadas según ubicación y disponibilidad</p>
+        </div>
+        <a class="enlace-flecha" th:href="@{/espacios}">Ver todas →</a>
     </div>
 
-    <div class="panel-info" style="margin-top:2rem">
-        <h3>Como empezar</h3>
-        <ol style="margin:0; padding-left:1.2rem; color:var(--texto-suave)">
-            <li>Crear un <a th:href="@{/usuarios/add}">usuario</a> con rol ADMINISTRADOR.</li>
-            <li>Crear un <a th:href="@{/negocios/add}">negocio</a> y asignarle ese administrador.</li>
-            <li>Agregar <a th:href="@{/espacios/add}">espacios</a> al negocio.</li>
-            <li>Registrar <a th:href="@{/reservas/add}">reservas</a>, luego su pago y su calificacion.</li>
-        </ol>
+    <div class="tarjeta" th:if="${#lists.isEmpty(destacados)}">
+        <div class="vacio">
+            <div class="icono-vacio"><th:block th:replace="~{fragmentos/iconos :: icono('cancha')}"></th:block></div>
+            <strong>Aún no hay canchas publicadas</strong>
+            <p>Cuando los negocios registren sus espacios aparecerán aquí.</p>
+        </div>
     </div>
-</main>
+
+    <div class="grid-canchas" th:unless="${#lists.isEmpty(destacados)}">
+        <article class="tarjeta-cancha" th:each="e : ${destacados}">
+            <div class="portada">
+                <svg th:replace="~{fragmentos/iconos :: cancha-svg}"></svg>
+                <span class="insignia izq">Disponible ahora</span>
+                <span class="insignia insignia-naranja der" th:text="${e.tipoDeporte}">Fútbol 5</span>
+            </div>
+            <div class="cuerpo">
+                <div class="fila-titulo">
+                    <h3><a th:href="@{/espacios/{id}(id=${e.id})}" th:text="${e.nombre}">Cancha El Bosque</a></h3>
+                    <span class="rating" th:with="p=${promedios.get(e.id)}">
+                        <th:block th:replace="~{fragmentos/iconos :: icono('estrella-llena')}"></th:block>
+                        <span th:text="${p != null and p > 0} ? ${#numbers.formatDecimal(p, 1, 1)} : 'Nuevo'">4.9</span>
+                    </span>
+                </div>
+                <div class="ubicacion">
+                    <th:block th:replace="~{fragmentos/iconos :: icono('ubicacion')}"></th:block>
+                    <span th:text="${e.negocio != null} ? ${e.negocio.nombre} : 'CanchaFácil'">Chapinero, Bogotá</span>
+                </div>
+                <div class="pie">
+                    <div>
+                        <div class="precio-etiqueta">Precio</div>
+                        <div class="precio" th:text="'$' + ${#numbers.formatDecimal(e.precioHora, 1, 'POINT', 0, 'COMMA')} + ' / hora'">$65.000 / hora</div>
+                    </div>
+                    <a class="btn btn-suave btn-sm" th:href="@{/reservas/add}">Reservar</a>
+                </div>
+            </div>
+        </article>
+    </div>
+</section>
+
+<!-- ===================== Como funciona ===================== -->
+<section class="seccion" id="como-funciona" style="padding-top:0">
+    <div class="seccion-cabecera">
+        <div>
+            <h2>Cómo funciona</h2>
+            <p>Reserva tu partido en tres pasos</p>
+        </div>
+    </div>
+    <div class="pasos">
+        <div class="paso">
+            <div class="num">1</div>
+            <h3>Elige tu cancha</h3>
+            <p>Filtra por tipo de cancha y compara precios y calificaciones.</p>
+        </div>
+        <div class="paso">
+            <div class="num">2</div>
+            <h3>Reserva el horario</h3>
+            <p>Escoge fecha y hora; el sistema evita cruces con otras reservas.</p>
+        </div>
+        <div class="paso">
+            <div class="num">3</div>
+            <h3>Paga y juega</h3>
+            <p>Registra tu pago, confirma la reserva y califica la cancha después del partido.</p>
+        </div>
+    </div>
+</section>
+
+<footer th:replace="~{fragmentos/layout :: footer-publico}"></footer>
 
 </body>
 </html>

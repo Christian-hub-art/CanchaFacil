@@ -1,58 +1,78 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title th:text="${accion}">Reserva</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-</head>
-<body>
+<head th:replace="~{fragmentos/layout :: head(${accion})}"></head>
+<body class="app">
 
-<header th:replace="~{fragmentos/cabecera :: cabecera}"></header>
+<header th:replace="~{fragmentos/layout :: topbar}"></header>
 
-<main class="contenedor-simple">
-    <h2 th:text="${accion}">Crear reserva</h2>
+<div class="app-cuerpo">
+    <aside th:replace="~{fragmentos/layout :: sidebar('reservas')}"></aside>
 
-    <div class="error" th:if="${error}" th:text="${error}"></div>
-    <p class="vacio" th:if="${#lists.isEmpty(usuarios) or #lists.isEmpty(espacios)}">
-        Necesita al menos un usuario y un espacio para poder reservar.
-    </p>
+    <main class="app-main">
+        <div class="pagina-cabecera">
+            <div>
+            <div class="migas"><a th:href="@{/reservas}">Reservas</a><span>/</span><span th:text="${accion}">Nueva</span></div>
+                <h1 th:text="${accion}">Crear reserva</h1>
+                <p>Elige la cancha, la fecha y el horario. El sistema valida que no se cruce con otra reserva.</p>
+            </div>
+            <div class="acciones"></div>
+        </div>
 
-    <form th:action="@{/reservas/add}" th:object="${reserva}" method="post">
-        <input type="hidden" th:field="*{id}">
+        <th:block th:replace="~{fragmentos/layout :: alertas}"></th:block>
+        <div class="tarjeta">
+            <form class="tarjeta-cuerpo" th:action="@{/reservas/add}" th:object="${reserva}" method="post" novalidate>
+                <div class="alerta alerta-error" th:if="${#fields.hasGlobalErrors()}">
+                    <th:block th:replace="~{fragmentos/iconos :: icono('alerta')}"></th:block>
+                    <div><div th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error</div></div>
+                </div>
+                <div class="alerta alerta-info" th:if="${#lists.isEmpty(usuarios) or #lists.isEmpty(espacios)}">
+                    <th:block th:replace="~{fragmentos/iconos :: icono('alerta')}"></th:block>
+                    <span>Se necesita al menos un usuario y una cancha registrados para crear una reserva.</span>
+                </div>
+                <input type="hidden" th:field="*{id}">
+                <div class="form-grid">
+                    <div class="campo-form">
+                        <label for="usuarioId">Jugador</label>
+                        <select class="control" id="usuarioId" name="usuarioId">
+                            <option value="">-- Seleccione --</option>
+                            <option th:each="u : ${usuarios}" th:value="${u.id}" th:text="${u.nombre} + ' · ' + ${u.email}"
+                                    th:selected="${reserva.usuario != null and reserva.usuario.id == u.id}">Opcion</option>
+                        </select>
+                    </div>
+                    <div class="campo-form">
+                        <label for="espacioId">Cancha</label>
+                        <select class="control" id="espacioId" name="espacioId">
+                            <option value="">-- Seleccione --</option>
+                            <option th:each="e : ${espacios}" th:value="${e.id}" th:text="${e.nombre} + ' · ' + ${e.tipoDeporte} + ' · $' + ${#numbers.formatDecimal(e.precioHora, 1, 'POINT', 0, 'COMMA')} + '/h'"
+                                    th:selected="${reserva.espacio != null and reserva.espacio.id == e.id}">Opcion</option>
+                        </select>
+                    </div>
+                    <div class="campo-form completo">
+                        <label for="fecha">Fecha</label>
+                        <input class="control" type="date" id="fecha" th:field="*{fecha}" th:errorclass="campo-invalido">
+                        <span class="error-campo" th:if="${#fields.hasErrors('fecha')}" th:errors="*{fecha}"></span>
+                    </div>
+                    <div class="campo-form">
+                        <label for="horaInicio">Hora de inicio</label>
+                        <input class="control" type="time" id="horaInicio" th:field="*{horaInicio}" th:errorclass="campo-invalido">
+                        <span class="error-campo" th:if="${#fields.hasErrors('horaInicio')}" th:errors="*{horaInicio}"></span>
+                    </div>
+                    <div class="campo-form">
+                        <label for="horaFin">Hora de fin</label>
+                        <input class="control" type="time" id="horaFin" th:field="*{horaFin}" th:errorclass="campo-invalido">
+                        <span class="error-campo" th:if="${#fields.hasErrors('horaFin')}" th:errors="*{horaFin}"></span>
+                    </div>
+                </div>
+                <div class="form-acciones">
+                    <a class="btn btn-neutro" th:href="@{/reservas}">Cancelar</a>
+                    <button class="btn btn-primario" type="submit"><th:block th:replace="~{fragmentos/iconos :: icono('check')}"></th:block> Guardar</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
 
-        <label for="usuarioId">Usuario</label>
-        <select id="usuarioId" name="usuarioId" required>
-            <option value="">-- Seleccione --</option>
-            <option th:each="u : ${usuarios}"
-                    th:value="${u.id}"
-                    th:text="${u.nombre}"
-                    th:selected="${reserva.usuario != null and reserva.usuario.id == u.id}">Juan</option>
-        </select>
-
-        <label for="espacioId">Espacio</label>
-        <select id="espacioId" name="espacioId" required>
-            <option value="">-- Seleccione --</option>
-            <option th:each="e : ${espacios}"
-                    th:value="${e.id}"
-                    th:text="${e.nombre} + ' (' + ${e.tipoDeporte} + ')'"
-                    th:selected="${reserva.espacio != null and reserva.espacio.id == e.id}">Cancha 1</option>
-        </select>
-
-        <label for="fecha">Fecha</label>
-        <input type="date" id="fecha" th:field="*{fecha}" required>
-
-        <label for="horaInicio">Hora de inicio</label>
-        <input type="time" id="horaInicio" th:field="*{horaInicio}" required>
-
-        <label for="horaFin">Hora de fin</label>
-        <input type="time" id="horaFin" th:field="*{horaFin}" required>
-
-        <p>
-            <button class="boton" type="submit">Guardar</button>
-            <a class="boton gris" th:href="@{/reservas}">Cancelar</a>
-        </p>
-    </form>
-</main>
+<footer th:replace="~{fragmentos/layout :: footer}"></footer>
 
 </body>
 </html>
